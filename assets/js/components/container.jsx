@@ -47,6 +47,7 @@ class Container extends React.Component {
     this.handleLinkClick = this.handleLinkClick.bind(this)
     this.handleOrderingChange = this.handleOrderingChange.bind(this)
     this.handleQueryingChange = this.handleQueryingChange.bind(this)
+    this.handleIncludingChange = this.handleIncludingChange.bind(this)
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
     this.baseUrl = this.baseUrl.bind(this)
   }
@@ -100,6 +101,10 @@ class Container extends React.Component {
               {...this.state}
               onChange={e => this.handleQueryingChange(e)}
             />
+            <Including
+              {...this.state}
+              onChange={e => this.handleIncludingChange(e)}
+            />
           </Flex>
         </Cell>
         <Cell size={6}>
@@ -120,8 +125,9 @@ class Container extends React.Component {
 
   handleLinkClick(link) {
     console.log("link click", link)
+    const params = {}
     API.get(link, response => {
-      this.setState({ response, current: link })
+      this.setState({ response, params, current: link })
     })
   }
 
@@ -152,6 +158,30 @@ class Container extends React.Component {
     } else {
       params = Object.assign(params, { [key]: value })
     }
+
+    this.setState({ params }, () => {
+      const current = this.currentURLWithExtraParams()
+      API.get(current, response => {
+        this.setState({ current, response })
+      })
+    })
+  }
+
+  handleIncludingChange(e) {
+    const { name, checked } = e.target
+    console.log("including", name, checked)
+    let params = this.state.params
+    let included = params.include || []
+
+    if (checked) {
+      included.push(name)
+    } else {
+      included = included.filter(i => i !== name)
+    }
+
+    params = Object.assign(params, {
+      include: included
+    })
 
     this.setState({ params }, () => {
       const current = this.currentURLWithExtraParams()
@@ -236,6 +266,27 @@ const Querying = ({ response, onChange, params }) => {
         <h3>Querying</h3>
         {options}
       </Flex>
+    )
+  } else {
+    return null
+  }
+}
+
+const Including = ({ response, onChange, params }) => {
+  if (response && response.meta && response.meta.can_include) {
+    const options = response.meta.can_include.map(o => (
+      <label key={o}>
+        <input type="checkbox" name={o} onChange={onChange} />
+        {o}
+      </label>
+    ))
+    return (
+      <div>
+        <h3>Including</h3>
+        <Flex>
+          {options}
+        </Flex>
+      </div>
     )
   } else {
     return null
