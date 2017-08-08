@@ -48,6 +48,7 @@ class Container extends React.Component {
     this.handleOrderingChange = this.handleOrderingChange.bind(this)
     this.handleQueryingChange = this.handleQueryingChange.bind(this)
     this.handleIncludingChange = this.handleIncludingChange.bind(this)
+    this.handleFilteringChange = this.handleFilteringChange.bind(this)
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
     this.baseUrl = this.baseUrl.bind(this)
   }
@@ -104,6 +105,10 @@ class Container extends React.Component {
             <Including
               {...this.state}
               onChange={e => this.handleIncludingChange(e)}
+            />
+            <Filtering
+              {...this.state}
+              onChange={e => this.handleFilteringChange(e)}
             />
           </Flex>
         </Cell>
@@ -181,6 +186,30 @@ class Container extends React.Component {
 
     params = Object.assign(params, {
       include: included
+    })
+
+    this.setState({ params }, () => {
+      const current = this.currentURLWithExtraParams()
+      API.get(current, response => {
+        this.setState({ current, response })
+      })
+    })
+  }
+
+  handleFilteringChange(e) {
+    const { name, checked } = e.target
+    console.log("filtering", name, checked)
+    let params = this.state.params
+    let filtered = params.filter || []
+
+    if (checked) {
+      filtered.push(name)
+    } else {
+      filtered = filtered.filter(i => i !== name)
+    }
+
+    params = Object.assign(params, {
+      filter: filtered
     })
 
     this.setState({ params }, () => {
@@ -280,9 +309,32 @@ const Including = ({ response, onChange, params }) => {
         {o}
       </label>
     ))
+
     return (
       <div>
         <h3>Including</h3>
+        <Flex>
+          {options}
+        </Flex>
+      </div>
+    )
+  } else {
+    return null
+  }
+}
+
+const Filtering = ({ response, onChange, params }) => {
+  if (response && response.meta && response.meta.can_filter) {
+    const options = response.meta.can_filter.map(o => (
+      <label key={o}>
+        <input type="checkbox" name={o} onChange={onChange} />
+        {o}
+      </label>
+    ))
+
+    return (
+      <div>
+        <h3>Filtering</h3>
         <Flex>
           {options}
         </Flex>
