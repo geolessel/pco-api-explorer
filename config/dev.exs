@@ -47,3 +47,7 @@ config :logger, :console, format: "[$level] $message\n"
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
+
+config :api_explorer,
+  application_id: System.get_env("API_EXPLORER_APP_ID"),
+  secret: System.get_env("API_EXPLORER_SECRET")

@@ -40,6 +40,7 @@ defmodule ApiExplorerWeb do
       import ApiExplorerWeb.Router.Helpers
       import ApiExplorerWeb.ErrorHelpers
       import ApiExplorerWeb.Gettext
+      import ReactPhoenix.ClientSide
     end
   end
 
