@@ -1,19 +1,36 @@
 import React from "react"
 import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
+import createStyledElement from "create-styled-element"
+import ListItem from "./ui/ListItem"
 
 const base64 = require("base-64")
 const defaultPerPage = 25
 const defaultPage = 1
 const defaultParams = { per_page: defaultPerPage, page: defaultPage }
 
+const Headline = props => {
+  const styles = {
+    color: "#333333",
+    fontSize: "18px",
+    lineHeight: "24px",
+    margin: "0 0 32px",
+  }
+  return createStyledElement("h1", props)(styles)
+}
+
+const OptionsLabel = props => {
+  const styles = { display: "block" }
+  return createStyledElement("label", props)(styles)
+}
+
 class API {
   static get(url, callback) {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -46,7 +63,7 @@ class Container extends React.Component {
       links: [],
       response: {},
       current: startingUrl,
-      params: { per_page: defaultPerPage, page: defaultPage }
+      params: { per_page: defaultPerPage, page: defaultPage },
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -73,7 +90,7 @@ class Container extends React.Component {
           name: k,
           self: data.links[k],
           children: [],
-          path: this.computePath(data.links[k])
+          path: this.computePath(data.links[k]),
         })
       })
     } else if (Array.isArray(data)) {
@@ -83,7 +100,7 @@ class Container extends React.Component {
             name: d.type,
             self: d.links.self,
             children: [],
-            path: this.computePath(d.links.self)
+            path: this.computePath(d.links.self),
           })
       )
     }
@@ -95,71 +112,104 @@ class Container extends React.Component {
         name: "people",
         self: response.data.links.self,
         children: this.createChildren({ response }),
-        path: this.computePath(response.data.links.self)
+        path: this.computePath(response.data.links.self),
       })
 
       this.setState({
         response: response,
         links: response.data.links,
-        tree: node
+        tree: node,
       })
     })
   }
 
   render() {
     const { current, response, tree } = this.state
+    const { Div, Input } = createStyledElement
 
     return (
-      <Grid size={12} gutter={{ x: 32, y: 16 }}>
-        <Cell size={12}>
-          <Flex direction="column">
-            <CurrentLink current={current} />
-          </Flex>
-        </Cell>
-        <Cell size={6}>
-          <Flex>
-            <h1>API Tree</h1>
-          </Flex>
-          <Flex direction="column">
-            <Tree
-              children={tree.children}
-              onClick={this.handleLinkClick}
-              key={tree.self}
-            />
-          </Flex>
-          <Flex direction="column">
-            <Ordering {...this.state} onChange={this.handleOrderingChange} />
-            <Querying
-              {...this.state}
-              onChange={e => this.handleQueryingChange(e)}
-            />
-            <Including
-              {...this.state}
-              onChange={e => this.handleIncludingChange(e)}
-            />
-            <Filtering
-              {...this.state}
-              onChange={e => this.handleFilteringChange(e)}
-            />
-            <Limiting
-              {...this.state}
-              onChange={e => this.handleLimitingChange(e)}
-            />
-          </Flex>
-        </Cell>
-        <Cell size={6}>
-          <Flex>
-            <h1>Server Response</h1>
-          </Flex>
-          <Flex>
-            <ReactJsonView
-              src={response}
-              collapsed={1}
-              displayDataTypes={false}
-            />
-          </Flex>
-        </Cell>
-      </Grid>
+      <Div css={{ display: "flex" }}>
+        <Div css={{ flexBasis: "200px", padding: "32px 0 0" }}>
+          <Headline>API Tree</Headline>
+          <Tree
+            children={tree.children}
+            onClick={this.handleLinkClick}
+            key={tree.self}
+            topLevelParent
+          />
+        </Div>
+        <Div
+          css={{
+            background: "#f7f7f7",
+            flex: "1",
+            padding: "32px",
+          }}
+        >
+          <Div
+            css={{
+              background: "#fafafa",
+              border: "1px solid #eeeeee",
+              borderRadius: "3px",
+              padding: "15px",
+            }}
+          >
+            <Headline css={{ display: "flex", margin: "0" }}>
+              <span>Current Link</span>
+              <Input
+                css={{
+                  color: "#979797",
+                  flex: "1",
+                  fontSize: "14px",
+                  lineHeight: "16px",
+                  margin: "-2px 0 -2px 8px",
+                  padding: "4px",
+                }}
+                readOnly={true}
+                type="text"
+                value={current}
+              />
+            </Headline>
+          </Div>
+          <Div css={{ display: "flex", flex: "1" }}>
+            <Div
+              css={{
+                flex: "1",
+                marginRight: "32px",
+                minWidth: "0",
+                overflow: "hidden",
+                textOverflow: "ellipses",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <Ordering {...this.state} onChange={this.handleOrderingChange} />
+              <Querying
+                {...this.state}
+                onChange={e => this.handleQueryingChange(e)}
+              />
+              <Including
+                {...this.state}
+                onChange={e => this.handleIncludingChange(e)}
+              />
+              <Filtering
+                {...this.state}
+                onChange={e => this.handleFilteringChange(e)}
+              />
+              <Limiting
+                {...this.state}
+                onChange={e => this.handleLimitingChange(e)}
+              />
+            </Div>
+            <Div css={{ flex: "1", minWidth: "0" }}>
+              <h3>Server Response</h3>
+              <ReactJsonView
+                src={response}
+                collapsed={1}
+                displayDataTypes={false}
+              />
+            </Div>
+          </Div>
+        </Div>
+      </Div>
     )
   }
 
@@ -208,7 +258,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included
+      include: included,
     })
 
     this.updateParams(params)
@@ -226,7 +276,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered
+      filter: filtered,
     })
 
     this.updateParams(params)
@@ -293,15 +343,20 @@ class Container extends React.Component {
   }
 }
 
-const Tree = ({ children, onClick, style }) => {
+const Tree = ({ children, topLevelParent, onClick, style }) => {
   const tree = children.map(l => {
     let children
     if (l.children.length > 0) {
-      children = <Tree children={l.children} onClick={onClick} />
+      children = (
+        <Tree children={l.children} onClick={onClick} topLevelParent={false} />
+      )
     }
 
+    const { Div } = createStyledElement
+
     return (
-      <Link
+      <ListItem
+        link
         url={l.self}
         onClick={e => {
           e.preventDefault()
@@ -309,15 +364,15 @@ const Tree = ({ children, onClick, style }) => {
           onClick(l.self)
         }}
         key={l.self}
-        current={false}
+        selected={false}
+        topLevelParent={topLevelParent}
       >
-        <strong>{l.name}</strong>
-        {" "}
-        -
-        {" "}
-        <small style={{ color: "#aaa" }}>/{l.path.join("/")}</small>
-        {children}
-      </Link>
+        {l.name}
+        {children &&
+          <Div css={{ margin: "8px 4px" }}>
+            {children}
+          </Div>}
+      </ListItem>
     )
   })
 
@@ -331,7 +386,7 @@ const Tree = ({ children, onClick, style }) => {
 const Link = ({ url, onClick, current, children }) => {
   const style = {
     padding: "0.5rem",
-    borderLeft: current ? "5px solid blue" : ""
+    borderLeft: current ? "5px solid blue" : "",
   }
 
   return (
@@ -343,18 +398,18 @@ const Link = ({ url, onClick, current, children }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o => (
-      <label key={o}>
+    const options = response.meta.can_order_by.map(o =>
+      <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {o}
-      </label>
-    ))
+      </OptionsLabel>
+    )
 
     return (
       <div>
         <h3>Ordering</h3>
-        <Flex>
-          <label key={"none"}>
+        <div>
+          <OptionsLabel key={"none"}>
             <input
               type="radio"
               name="orderBy"
@@ -363,9 +418,9 @@ const Ordering = ({ response, onChange, params }) => {
               checked={params.order == undefined}
             />
             None
-          </label>
+          </OptionsLabel>
           {options}
-        </Flex>
+        </div>
       </div>
     )
   } else {
@@ -375,12 +430,12 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o => (
-      <label key={o}>
+    const options = response.meta.can_query_by.map(o =>
+      <OptionsLabel key={o}>
         {o}
         <input type="text" name={o} onChange={onChange} />
-      </label>
-    ))
+      </OptionsLabel>
+    )
 
     return (
       <Flex direction="column">
@@ -395,19 +450,19 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o => (
-      <label key={o}>
+    const options = response.meta.can_include.map(o =>
+      <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
-      </label>
-    ))
+      </OptionsLabel>
+    )
 
     return (
       <div>
         <h3>Including</h3>
-        <Flex>
+        <div>
           {options}
-        </Flex>
+        </div>
       </div>
     )
   } else {
@@ -417,19 +472,19 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o => (
-      <label key={o}>
+    const options = response.meta.can_filter.map(o =>
+      <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
-      </label>
-    ))
+      </OptionsLabel>
+    )
 
     return (
       <div>
         <h3>Filtering</h3>
-        <Flex>
+        <div>
           {options}
-        </Flex>
+        </div>
       </div>
     )
   } else {
@@ -467,15 +522,24 @@ const Limiting = ({ response, onChange, params }) => {
 
 const CurrentLink = ({ current }) => {
   return (
-    <div>
-      <h3>Current Link</h3>
-      <input
-        style={{ width: "100%" }}
-        readOnly={true}
-        type="text"
-        value={current}
-      />
-    </div>
+    <Div css={{ background: "#fafafa", padding: "4px" }}>
+      <Headline css={{ display: "flex", margin: "0" }}>
+        <span>Current Link</span>
+        <input
+          style={{
+            color: "#979797",
+            flex: "1",
+            fontSize: "14px",
+            lineHeight: "16px",
+            marginLeft: "8px",
+            padding: "4px",
+          }}
+          readOnly={true}
+          type="text"
+          value={current}
+        />
+      </Headline>
+    </Div>
   )
 }
 
