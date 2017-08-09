@@ -3,6 +3,9 @@ import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
 
 const base64 = require("base-64")
+const defaultPerPage = 25
+const defaultPage = 1
+const defaultParams = { per_page: defaultPerPage, page: defaultPage }
 
 class API {
   static get(url, callback) {
@@ -43,7 +46,7 @@ class Container extends React.Component {
       links: [],
       response: {},
       current: startingUrl,
-      params: {}
+      params: { per_page: defaultPerPage, page: defaultPage }
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -53,6 +56,7 @@ class Container extends React.Component {
     this.handleQueryingChange = this.handleQueryingChange.bind(this)
     this.handleIncludingChange = this.handleIncludingChange.bind(this)
     this.handleFilteringChange = this.handleFilteringChange.bind(this)
+    this.handleLimitingChange = this.handleLimitingChange.bind(this)
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
     this.updateParams = this.updateParams.bind(this)
     this.createChildren = this.createChildren.bind(this)
@@ -137,6 +141,10 @@ class Container extends React.Component {
               {...this.state}
               onChange={e => this.handleFilteringChange(e)}
             />
+            <Limiting
+              {...this.state}
+              onChange={e => this.handleLimitingChange(e)}
+            />
           </Flex>
         </Cell>
         <Cell size={6}>
@@ -158,7 +166,7 @@ class Container extends React.Component {
   handleLinkClick(current) {
     console.log("click", current)
     this.setState({ current })
-    this.updateParams({})
+    this.updateParams(defaultParams)
   }
 
   handleOrderingChange(e) {
@@ -221,7 +229,14 @@ class Container extends React.Component {
       filter: filtered
     })
 
-    this.update_params(params)
+    this.updateParams(params)
+  }
+
+  handleLimitingChange(e) {
+    const { name, value } = e.target
+    let params = this.state.params
+    params = Object.assign(params, { [name]: value })
+    this.updateParams(params)
   }
 
   findNodeBySelf(link) {
@@ -250,6 +265,12 @@ class Container extends React.Component {
   currentURLWithExtraParams(extraParams = {}) {
     const base = this.baseUrl()
     let params = Object.assign(this.state.params, extraParams)
+    if (params.per_page == defaultPerPage) {
+      delete params.per_page
+    }
+    if (params.page == defaultPage) {
+      delete params.page
+    }
     params = Object.keys(params).map(k => `${k}=${params[k]}`).join("&")
     if (Object.keys(params).length > 0) {
       return `${base}?${params}`
@@ -414,6 +435,34 @@ const Filtering = ({ response, onChange, params }) => {
   } else {
     return null
   }
+}
+
+const Limiting = ({ response, onChange, params }) => {
+  return (
+    <div>
+      <h3>Limiting</h3>
+      <div>
+        <label htmlFor="page">Page:</label>
+        {" "}
+        <input
+          type="text"
+          name="page"
+          value={params.page}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <label htmlFor="perPage">Per page:</label>
+        {" "}
+        <input
+          type="text"
+          name="per_page"
+          value={params.per_page}
+          onChange={onChange}
+        />
+      </div>
+    </div>
+  )
 }
 
 const CurrentLink = ({ current }) => {
