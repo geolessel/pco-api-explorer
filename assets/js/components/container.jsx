@@ -1,16 +1,26 @@
 import React from "react"
 import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
+import createStyledElement from "create-styled-element"
+import ListItem from "./ui/ListItem"
 
 const base64 = require("base-64")
+
+const Headline = props => {
+  const styles = {
+    color: "#333333",
+    fontSize: "18px",
+  }
+  return createStyledElement("h1", props)(styles)
+}
 
 class API {
   static get(url, callback) {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -39,7 +49,7 @@ class Container extends React.Component {
       links: [],
       response: {},
       current: startingUrl,
-      params: {}
+      params: {},
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -58,29 +68,30 @@ class Container extends React.Component {
       const node = new Node({
         name: "root",
         self: resp.data.links.self,
-        children: resp.data.links
+        children: resp.data.links,
       })
 
       this.setState({
         response: resp,
         links: resp.data.links,
-        tree: node
+        tree: node,
       })
     })
   }
 
   render() {
     const { current, response } = this.state
-    const links = Object.keys(this.state.links).map(l => (
-      <Link
+    const links = Object.keys(this.state.links).map(l =>
+      <ListItem
+        link
         url={this.state.links[l]}
         onClick={c => this.handleLinkClick(this.state.links[l])}
         key={l}
-        current={this.baseUrl() === this.state.links[l]}
+        selected={this.baseUrl() === this.state.links[l]}
       >
         {l}
-      </Link>
-    ))
+      </ListItem>
+    )
 
     return (
       <Grid size={12} gutter={{ x: 32, y: 16 }}>
@@ -89,13 +100,15 @@ class Container extends React.Component {
             <CurrentLink current={current} />
           </Flex>
         </Cell>
-        <Cell size={6}>
+        <Cell size={2}>
           <Flex>
-            <h1>API Tree</h1>
+            <Headline>API Tree</Headline>
           </Flex>
           <Flex direction="column">
             {links}
           </Flex>
+        </Cell>
+        <Cell size={5}>
           <Flex direction="column">
             <Ordering {...this.state} onChange={this.handleOrderingChange} />
             <Querying
@@ -112,7 +125,7 @@ class Container extends React.Component {
             />
           </Flex>
         </Cell>
-        <Cell size={6}>
+        <Cell size={5}>
           <Flex>
             <h1>Server Response</h1>
           </Flex>
@@ -185,7 +198,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included
+      include: included,
     })
 
     this.setState({ params }, () => {
@@ -209,7 +222,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered
+      filter: filtered,
     })
 
     this.setState({ params }, () => {
@@ -236,27 +249,14 @@ class Container extends React.Component {
   }
 }
 
-const Link = ({ url, onClick, current, children }) => {
-  const style = {
-    padding: "0.5rem",
-    borderLeft: current ? "5px solid blue" : ""
-  }
-
-  return (
-    <div onClick={onClick} style={style}>
-      {children}
-    </div>
-  )
-}
-
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o => (
+    const options = response.meta.can_order_by.map(o =>
       <label key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {o}
       </label>
-    ))
+    )
 
     return (
       <div>
@@ -283,12 +283,12 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o => (
+    const options = response.meta.can_query_by.map(o =>
       <label key={o}>
         {o}
         <input type="text" name={o} onChange={onChange} />
       </label>
-    ))
+    )
 
     return (
       <Flex direction="column">
@@ -303,12 +303,12 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o => (
+    const options = response.meta.can_include.map(o =>
       <label key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </label>
-    ))
+    )
 
     return (
       <div>
@@ -325,12 +325,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o => (
+    const options = response.meta.can_filter.map(o =>
       <label key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </label>
-    ))
+    )
 
     return (
       <div>

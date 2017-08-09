@@ -1,5 +1,9 @@
 # ApiExplorer
 
+Setup:
+  * Create a Personal Access Token (http://api.pco.dev/oauth/applications)
+  * Add `API_EXPLORER_APP_ID=<id>` and `API_EXPLORER_SECRET=<secret>` to your terminal
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
