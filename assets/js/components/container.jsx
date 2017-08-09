@@ -10,8 +10,15 @@ const Headline = props => {
   const styles = {
     color: "#333333",
     fontSize: "18px",
+    lineHeight: "24px",
+    margin: "0 0 32px",
   }
   return createStyledElement("h1", props)(styles)
+}
+
+const OptionsLabel = props => {
+  const styles = { display: "block" }
+  return createStyledElement("label", props)(styles)
 }
 
 class API {
@@ -92,52 +99,82 @@ class Container extends React.Component {
         {l}
       </ListItem>
     )
+    const { Div, Input } = createStyledElement
 
     return (
-      <Grid size={12} gutter={{ x: 32, y: 16 }}>
-        <Cell size={12}>
-          <Flex direction="column">
-            <CurrentLink current={current} />
-          </Flex>
-        </Cell>
-        <Cell size={2}>
-          <Flex>
-            <Headline>API Tree</Headline>
-          </Flex>
-          <Flex direction="column">
-            {links}
-          </Flex>
-        </Cell>
-        <Cell size={5}>
-          <Flex direction="column">
-            <Ordering {...this.state} onChange={this.handleOrderingChange} />
-            <Querying
-              {...this.state}
-              onChange={e => this.handleQueryingChange(e)}
-            />
-            <Including
-              {...this.state}
-              onChange={e => this.handleIncludingChange(e)}
-            />
-            <Filtering
-              {...this.state}
-              onChange={e => this.handleFilteringChange(e)}
-            />
-          </Flex>
-        </Cell>
-        <Cell size={5}>
-          <Flex>
-            <h1>Server Response</h1>
-          </Flex>
-          <Flex>
-            <ReactJsonView
-              src={response}
-              collapsed={1}
-              displayDataTypes={false}
-            />
-          </Flex>
-        </Cell>
-      </Grid>
+      <Div css={{ display: "flex" }}>
+        <Div css={{ flexBasis: "200px", padding: "32px 0 0" }}>
+          <Headline>API Tree</Headline>
+          <div>{links}</div>
+        </Div>
+        <Div
+          css={{
+            background: "#f7f7f7",
+            flex: "1",
+            padding: "32px",
+          }}
+        >
+          <Div
+            css={{
+              background: "#fafafa",
+              border: "1px solid #eeeeee",
+              borderRadius: "3px",
+              padding: "15px",
+            }}
+          >
+            <Headline css={{ display: "flex", margin: "0" }}>
+              <span>Current Link</span>
+              <Input
+                css={{
+                  color: "#979797",
+                  flex: "1",
+                  fontSize: "14px",
+                  lineHeight: "16px",
+                  margin: "-2px 0 -2px 8px",
+                  padding: "4px",
+                }}
+                readOnly={true}
+                type="text"
+                value={current}
+              />
+            </Headline>
+          </Div>
+          <Div css={{ display: "flex", flex: "1" }}>
+            <Div
+              css={{
+                flex: "1",
+                marginRight: "32px",
+                minWidth: "0",
+                overflow: "hidden",
+                textOverflow: "ellipses",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <Ordering {...this.state} onChange={this.handleOrderingChange} />
+              <Querying
+                {...this.state}
+                onChange={e => this.handleQueryingChange(e)}
+              />
+              <Including
+                {...this.state}
+                onChange={e => this.handleIncludingChange(e)}
+              />
+              <Filtering
+                {...this.state}
+                onChange={e => this.handleFilteringChange(e)}
+              />
+            </Div>
+            <Div css={{ flex: "1", minWidth: "0" }}>
+              <h3>Server Response</h3>
+              <ReactJsonView
+                src={response}
+                collapsed={1}
+                displayDataTypes={false}
+              />
+            </Div>
+          </Div>
+        </Div>
+      </Div>
     )
   }
 
@@ -252,17 +289,17 @@ class Container extends React.Component {
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
     const options = response.meta.can_order_by.map(o =>
-      <label key={o}>
+      <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {o}
-      </label>
+      </OptionsLabel>
     )
 
     return (
       <div>
         <h3>Ordering</h3>
-        <Flex>
-          <label key={"none"}>
+        <div>
+          <OptionsLabel key={"none"}>
             <input
               type="radio"
               name="orderBy"
@@ -271,9 +308,9 @@ const Ordering = ({ response, onChange, params }) => {
               checked={params.order == undefined}
             />
             None
-          </label>
+          </OptionsLabel>
           {options}
-        </Flex>
+        </div>
       </div>
     )
   } else {
@@ -284,10 +321,10 @@ const Ordering = ({ response, onChange, params }) => {
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
     const options = response.meta.can_query_by.map(o =>
-      <label key={o}>
+      <OptionsLabel key={o}>
         {o}
         <input type="text" name={o} onChange={onChange} />
-      </label>
+      </OptionsLabel>
     )
 
     return (
@@ -304,18 +341,18 @@ const Querying = ({ response, onChange, params }) => {
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
     const options = response.meta.can_include.map(o =>
-      <label key={o}>
+      <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
-      </label>
+      </OptionsLabel>
     )
 
     return (
       <div>
         <h3>Including</h3>
-        <Flex>
+        <div>
           {options}
-        </Flex>
+        </div>
       </div>
     )
   } else {
@@ -326,18 +363,18 @@ const Including = ({ response, onChange, params }) => {
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
     const options = response.meta.can_filter.map(o =>
-      <label key={o}>
+      <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
-      </label>
+      </OptionsLabel>
     )
 
     return (
       <div>
         <h3>Filtering</h3>
-        <Flex>
+        <div>
           {options}
-        </Flex>
+        </div>
       </div>
     )
   } else {
@@ -347,15 +384,24 @@ const Filtering = ({ response, onChange, params }) => {
 
 const CurrentLink = ({ current }) => {
   return (
-    <div>
-      <h3>Current Link</h3>
-      <input
-        style={{ width: "100%" }}
-        readOnly={true}
-        type="text"
-        value={current}
-      />
-    </div>
+    <Div css={{ background: "#fafafa", padding: "4px" }}>
+      <Headline css={{ display: "flex", margin: "0" }}>
+        <span>Current Link</span>
+        <input
+          style={{
+            color: "#979797",
+            flex: "1",
+            fontSize: "14px",
+            lineHeight: "16px",
+            marginLeft: "8px",
+            padding: "4px",
+          }}
+          readOnly={true}
+          type="text"
+          value={current}
+        />
+      </Headline>
+    </Div>
   )
 }
 

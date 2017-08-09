@@ -2,7 +2,11 @@
 
 body {
   font-family: lato, sans-serif;
-  width: 1200px;
   margin: 0 auto;
   padding-bottom: 4rem;
+  width: 1200px;
+}
+
+.alert {
+  margin: 0;
 }
