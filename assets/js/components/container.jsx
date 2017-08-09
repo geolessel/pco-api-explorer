@@ -18,10 +18,11 @@ class API {
 }
 
 class Node {
-  constructor({ name, self, children }) {
+  constructor({ name, self, children, path }) {
     this.name = name
     this.self = self
     this.children = children
+    this.path = path
   }
 }
 
@@ -31,11 +32,14 @@ class Container extends React.Component {
 
     this.apiRoot = `http://api.pco.dev`
     const startingUrl = `${this.apiRoot}/people/v2`
+    const startingApp = "people"
+    const startingVersion = 2
 
     this.state = {
-      app: "people",
-      version: 2,
-      tree: [],
+      app: startingApp,
+      version: startingVersion,
+      tree: { children: [] },
+      baseUrl: `${this.apiRoot}/${startingApp}/v${startingVersion}`,
       links: [],
       response: {},
       current: startingUrl,
@@ -50,37 +54,56 @@ class Container extends React.Component {
     this.handleIncludingChange = this.handleIncludingChange.bind(this)
     this.handleFilteringChange = this.handleFilteringChange.bind(this)
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
+    this.updateParams = this.updateParams.bind(this)
+    this.createChildren = this.createChildren.bind(this)
+    this.findNodeBySelf = this.findNodeBySelf.bind(this)
     this.baseUrl = this.baseUrl.bind(this)
+    this.computePath = this.computePath.bind(this)
+  }
+
+  createChildren({ response }) {
+    const { data } = response
+    if (data.links) {
+      return Object.keys(data.links).map(k => {
+        return new Node({
+          name: k,
+          self: data.links[k],
+          children: [],
+          path: this.computePath(data.links[k])
+        })
+      })
+    } else if (Array.isArray(data)) {
+      return data.map(
+        d =>
+          new Node({
+            name: d.type,
+            self: d.links.self,
+            children: [],
+            path: this.computePath(d.links.self)
+          })
+      )
+    }
   }
 
   componentDidMount() {
-    API.get(this.state.current, resp => {
+    API.get(this.state.current, response => {
       const node = new Node({
-        name: "root",
-        self: resp.data.links.self,
-        children: resp.data.links
+        name: "people",
+        self: response.data.links.self,
+        children: this.createChildren({ response }),
+        path: this.computePath(response.data.links.self)
       })
 
       this.setState({
-        response: resp,
-        links: resp.data.links,
+        response: response,
+        links: response.data.links,
         tree: node
       })
     })
   }
 
   render() {
-    const { current, response } = this.state
-    const links = Object.keys(this.state.links).map(l => (
-      <Link
-        url={this.state.links[l]}
-        onClick={c => this.handleLinkClick(this.state.links[l])}
-        key={l}
-        current={this.baseUrl() === this.state.links[l]}
-      >
-        {l}
-      </Link>
-    ))
+    const { current, response, tree } = this.state
 
     return (
       <Grid size={12} gutter={{ x: 32, y: 16 }}>
@@ -94,7 +117,11 @@ class Container extends React.Component {
             <h1>API Tree</h1>
           </Flex>
           <Flex direction="column">
-            {links}
+            <Tree
+              children={tree.children}
+              onClick={this.handleLinkClick}
+              key={tree.self}
+            />
           </Flex>
           <Flex direction="column">
             <Ordering {...this.state} onChange={this.handleOrderingChange} />
@@ -128,12 +155,10 @@ class Container extends React.Component {
     )
   }
 
-  handleLinkClick(link) {
-    console.log("link click", link)
-    const params = {}
-    API.get(link, response => {
-      this.setState({ response, params, current: link })
-    })
+  handleLinkClick(current) {
+    console.log("click", current)
+    this.setState({ current })
+    this.updateParams({})
   }
 
   handleOrderingChange(e) {
@@ -145,12 +170,8 @@ class Container extends React.Component {
     } else {
       params = Object.assign(params, { order: value })
     }
-    this.setState({ params }, () => {
-      const current = this.currentURLWithExtraParams()
-      API.get(current, response => {
-        this.setState({ current, response })
-      })
-    })
+
+    this.updateParams(params)
   }
 
   handleQueryingChange(e) {
@@ -164,17 +185,11 @@ class Container extends React.Component {
       params = Object.assign(params, { [key]: value })
     }
 
-    this.setState({ params }, () => {
-      const current = this.currentURLWithExtraParams()
-      API.get(current, response => {
-        this.setState({ current, response })
-      })
-    })
+    this.updateParams(params)
   }
 
   handleIncludingChange(e) {
     const { name, checked } = e.target
-    console.log("including", name, checked)
     let params = this.state.params
     let included = params.include || []
 
@@ -188,17 +203,11 @@ class Container extends React.Component {
       include: included
     })
 
-    this.setState({ params }, () => {
-      const current = this.currentURLWithExtraParams()
-      API.get(current, response => {
-        this.setState({ current, response })
-      })
-    })
+    this.updateParams(params)
   }
 
   handleFilteringChange(e) {
     const { name, checked } = e.target
-    console.log("filtering", name, checked)
     let params = this.state.params
     let filtered = params.filter || []
 
@@ -212,10 +221,28 @@ class Container extends React.Component {
       filter: filtered
     })
 
+    this.update_params(params)
+  }
+
+  findNodeBySelf(link) {
+    return this.state.tree.children.find(n => n.self === link)
+  }
+
+  updateParams(params) {
     this.setState({ params }, () => {
       const current = this.currentURLWithExtraParams()
       API.get(current, response => {
-        this.setState({ current, response })
+        // TODO use underscore or something for this deep merge? Sheesh.
+        let parent = this.findNodeBySelf(current)
+        let tree = this.state.tree
+        if (parent) {
+          parent.children = this.createChildren({ response })
+          const index = tree.children.indexOf(parent)
+          const child = Object.assign(tree.children[index], parent)
+          const children = Object.assign(tree.children, children)
+          tree = Object.assign(tree, children)
+        }
+        this.setState({ current, response, tree })
       })
     })
   }
@@ -234,6 +261,50 @@ class Container extends React.Component {
   baseUrl() {
     return this.state.current.split("?")[0]
   }
+
+  computePath(link) {
+    let path = link
+      .replace(this.state.baseUrl, "")
+      .replace(/\/\d+(\/)*/g, "/:id$1")
+      .split("/")
+    path.shift()
+    return path
+  }
+}
+
+const Tree = ({ children, onClick, style }) => {
+  const tree = children.map(l => {
+    let children
+    if (l.children.length > 0) {
+      children = <Tree children={l.children} onClick={onClick} />
+    }
+
+    return (
+      <Link
+        url={l.self}
+        onClick={e => {
+          e.preventDefault()
+          e.stopPropagation()
+          onClick(l.self)
+        }}
+        key={l.self}
+        current={false}
+      >
+        <strong>{l.name}</strong>
+        {" "}
+        -
+        {" "}
+        <small style={{ color: "#aaa" }}>/{l.path.join("/")}</small>
+        {children}
+      </Link>
+    )
+  })
+
+  return (
+    <div>
+      {tree}
+    </div>
+  )
 }
 
 const Link = ({ url, onClick, current, children }) => {
