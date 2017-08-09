@@ -5,6 +5,9 @@ import createStyledElement from "create-styled-element"
 import ListItem from "./ui/ListItem"
 
 const base64 = require("base-64")
+const defaultPerPage = 25
+const defaultPage = 1
+const defaultParams = { per_page: defaultPerPage, page: defaultPage }
 
 const Headline = props => {
   const styles = {
@@ -35,10 +38,11 @@ class API {
 }
 
 class Node {
-  constructor({ name, self, children }) {
+  constructor({ name, self, children, path }) {
     this.name = name
     this.self = self
     this.children = children
+    this.path = path
   }
 }
 
@@ -48,15 +52,18 @@ class Container extends React.Component {
 
     this.apiRoot = `http://api.pco.dev`
     const startingUrl = `${this.apiRoot}/people/v2`
+    const startingApp = "people"
+    const startingVersion = 2
 
     this.state = {
-      app: "people",
-      version: 2,
-      tree: [],
+      app: startingApp,
+      version: startingVersion,
+      tree: { children: [] },
+      baseUrl: `${this.apiRoot}/${startingApp}/v${startingVersion}`,
       links: [],
       response: {},
       current: startingUrl,
-      params: {},
+      params: { per_page: defaultPerPage, page: defaultPage }
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -66,45 +73,65 @@ class Container extends React.Component {
     this.handleQueryingChange = this.handleQueryingChange.bind(this)
     this.handleIncludingChange = this.handleIncludingChange.bind(this)
     this.handleFilteringChange = this.handleFilteringChange.bind(this)
+    this.handleLimitingChange = this.handleLimitingChange.bind(this)
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
+    this.updateParams = this.updateParams.bind(this)
+    this.createChildren = this.createChildren.bind(this)
+    this.findNodeBySelf = this.findNodeBySelf.bind(this)
     this.baseUrl = this.baseUrl.bind(this)
+    this.computePath = this.computePath.bind(this)
+  }
+
+  createChildren({ response }) {
+    const { data } = response
+    if (data.links) {
+      return Object.keys(data.links).map(k => {
+        return new Node({
+          name: k,
+          self: data.links[k],
+          children: [],
+          path: this.computePath(data.links[k])
+        })
+      })
+    } else if (Array.isArray(data)) {
+      return data.map(
+        d =>
+          new Node({
+            name: d.type,
+            self: d.links.self,
+            children: [],
+            path: this.computePath(d.links.self)
+          })
+      )
+    }
   }
 
   componentDidMount() {
-    API.get(this.state.current, resp => {
+    API.get(this.state.current, response => {
       const node = new Node({
-        name: "root",
-        self: resp.data.links.self,
-        children: resp.data.links,
+        name: "people",
+        self: response.data.links.self,
+        children: this.createChildren({ response }),
+        path: this.computePath(response.data.links.self)
       })
 
       this.setState({
-        response: resp,
-        links: resp.data.links,
-        tree: node,
+        response: response,
+        links: response.data.links,
+        tree: node
       })
     })
   }
 
   render() {
-    const { current, response } = this.state
-    const links = Object.keys(this.state.links).map(l =>
-      <ListItem
-        link
-        url={this.state.links[l]}
-        onClick={c => this.handleLinkClick(this.state.links[l])}
-        key={l}
-        selected={this.baseUrl() === this.state.links[l]}
-      >
-        {l}
-      </ListItem>
-    )
+    const { current, response, tree } = this.state
     const { Div, Input } = createStyledElement
 
     return (
       <Div css={{ display: "flex" }}>
         <Div css={{ flexBasis: "200px", padding: "32px 0 0" }}>
           <Headline>API Tree</Headline>
+          <Tree children={tree.children} onClick={this.handleLinkClick} key={tree.self} />
           <div>{links}</div>
         </Div>
         <Div
@@ -163,6 +190,10 @@ class Container extends React.Component {
                 {...this.state}
                 onChange={e => this.handleFilteringChange(e)}
               />
+              <Limiting
+                {...this.state}
+                onChange={e => this.handleLimitingChange(e)}
+              />
             </Div>
             <Div css={{ flex: "1", minWidth: "0" }}>
               <h3>Server Response</h3>
@@ -178,12 +209,10 @@ class Container extends React.Component {
     )
   }
 
-  handleLinkClick(link) {
-    console.log("link click", link)
-    const params = {}
-    API.get(link, response => {
-      this.setState({ response, params, current: link })
-    })
+  handleLinkClick(current) {
+    console.log("click", current)
+    this.setState({ current })
+    this.updateParams(defaultParams)
   }
 
   handleOrderingChange(e) {
@@ -195,12 +224,8 @@ class Container extends React.Component {
     } else {
       params = Object.assign(params, { order: value })
     }
-    this.setState({ params }, () => {
-      const current = this.currentURLWithExtraParams()
-      API.get(current, response => {
-        this.setState({ current, response })
-      })
-    })
+
+    this.updateParams(params)
   }
 
   handleQueryingChange(e) {
@@ -214,17 +239,11 @@ class Container extends React.Component {
       params = Object.assign(params, { [key]: value })
     }
 
-    this.setState({ params }, () => {
-      const current = this.currentURLWithExtraParams()
-      API.get(current, response => {
-        this.setState({ current, response })
-      })
-    })
+    this.updateParams(params)
   }
 
   handleIncludingChange(e) {
     const { name, checked } = e.target
-    console.log("including", name, checked)
     let params = this.state.params
     let included = params.include || []
 
@@ -238,17 +257,11 @@ class Container extends React.Component {
       include: included,
     })
 
-    this.setState({ params }, () => {
-      const current = this.currentURLWithExtraParams()
-      API.get(current, response => {
-        this.setState({ current, response })
-      })
-    })
+    this.updateParams(params)
   }
 
   handleFilteringChange(e) {
     const { name, checked } = e.target
-    console.log("filtering", name, checked)
     let params = this.state.params
     let filtered = params.filter || []
 
@@ -262,10 +275,35 @@ class Container extends React.Component {
       filter: filtered,
     })
 
+    this.updateParams(params)
+  }
+
+  handleLimitingChange(e) {
+    const { name, value } = e.target
+    let params = this.state.params
+    params = Object.assign(params, { [name]: value })
+    this.updateParams(params)
+  }
+
+  findNodeBySelf(link) {
+    return this.state.tree.children.find(n => n.self === link)
+  }
+
+  updateParams(params) {
     this.setState({ params }, () => {
       const current = this.currentURLWithExtraParams()
       API.get(current, response => {
-        this.setState({ current, response })
+        // TODO use underscore or something for this deep merge? Sheesh.
+        let parent = this.findNodeBySelf(current)
+        let tree = this.state.tree
+        if (parent) {
+          parent.children = this.createChildren({ response })
+          const index = tree.children.indexOf(parent)
+          const child = Object.assign(tree.children[index], parent)
+          const children = Object.assign(tree.children, children)
+          tree = Object.assign(tree, children)
+        }
+        this.setState({ current, response, tree })
       })
     })
   }
@@ -273,6 +311,12 @@ class Container extends React.Component {
   currentURLWithExtraParams(extraParams = {}) {
     const base = this.baseUrl()
     let params = Object.assign(this.state.params, extraParams)
+    if (params.per_page == defaultPerPage) {
+      delete params.per_page
+    }
+    if (params.page == defaultPage) {
+      delete params.page
+    }
     params = Object.keys(params).map(k => `${k}=${params[k]}`).join("&")
     if (Object.keys(params).length > 0) {
       return `${base}?${params}`
@@ -284,6 +328,64 @@ class Container extends React.Component {
   baseUrl() {
     return this.state.current.split("?")[0]
   }
+
+  computePath(link) {
+    let path = link
+      .replace(this.state.baseUrl, "")
+      .replace(/\/\d+(\/)*/g, "/:id$1")
+      .split("/")
+    path.shift()
+    return path
+  }
+}
+
+const Tree = ({ children, onClick, style }) => {
+  const tree = children.map(l => {
+    let children
+    if (l.children.length > 0) {
+      children = <Tree children={l.children} onClick={onClick} />
+    }
+
+    return (
+      <ListItem
+        link
+        url={l.self}
+        onClick={e => {
+          e.preventDefault()
+          e.stopPropagation()
+          onClick(l.self)
+        }}
+        key={l.self}
+        selected={false}
+      >
+        <strong>{l.name}</strong>
+        {" "}
+        -
+        {" "}
+        <small style={{ color: "#aaa" }}>/{l.path.join("/")}</small>
+        {children}
+      </ListItem>
+    )
+  })
+
+  return (
+    <div>
+      {tree}
+    </div>
+  )
+}
+
+const Link = ({ url, onClick, current, children }) => {
+  const style = {
+    padding: "0.5rem",
+    borderLeft: current ? "5px solid blue" : ""
+  }
+
+  return (
+    <div onClick={onClick} style={style}>
+      {children}
+    </div>
+  )
 }
 
 const Ordering = ({ response, onChange, params }) => {
@@ -380,6 +482,34 @@ const Filtering = ({ response, onChange, params }) => {
   } else {
     return null
   }
+}
+
+const Limiting = ({ response, onChange, params }) => {
+  return (
+    <div>
+      <h3>Limiting</h3>
+      <div>
+        <label htmlFor="page">Page:</label>
+        {" "}
+        <input
+          type="text"
+          name="page"
+          value={params.page}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <label htmlFor="perPage">Per page:</label>
+        {" "}
+        <input
+          type="text"
+          name="per_page"
+          value={params.per_page}
+          onChange={onChange}
+        />
+      </div>
+    </div>
+  )
 }
 
 const CurrentLink = ({ current }) => {
