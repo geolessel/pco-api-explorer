@@ -63,7 +63,7 @@ class Container extends React.Component {
       links: [],
       response: {},
       current: startingUrl,
-      params: { per_page: defaultPerPage, page: defaultPage }
+      params: { per_page: defaultPerPage, page: defaultPage },
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -90,7 +90,7 @@ class Container extends React.Component {
           name: k,
           self: data.links[k],
           children: [],
-          path: this.computePath(data.links[k])
+          path: this.computePath(data.links[k]),
         })
       })
     } else if (Array.isArray(data)) {
@@ -100,7 +100,7 @@ class Container extends React.Component {
             name: d.type,
             self: d.links.self,
             children: [],
-            path: this.computePath(d.links.self)
+            path: this.computePath(d.links.self),
           })
       )
     }
@@ -112,13 +112,13 @@ class Container extends React.Component {
         name: "people",
         self: response.data.links.self,
         children: this.createChildren({ response }),
-        path: this.computePath(response.data.links.self)
+        path: this.computePath(response.data.links.self),
       })
 
       this.setState({
         response: response,
         links: response.data.links,
-        tree: node
+        tree: node,
       })
     })
   }
@@ -131,8 +131,12 @@ class Container extends React.Component {
       <Div css={{ display: "flex" }}>
         <Div css={{ flexBasis: "200px", padding: "32px 0 0" }}>
           <Headline>API Tree</Headline>
-          <Tree children={tree.children} onClick={this.handleLinkClick} key={tree.self} />
-          <div>{links}</div>
+          <Tree
+            children={tree.children}
+            onClick={this.handleLinkClick}
+            key={tree.self}
+            topLevelParent
+          />
         </Div>
         <Div
           css={{
@@ -339,12 +343,16 @@ class Container extends React.Component {
   }
 }
 
-const Tree = ({ children, onClick, style }) => {
+const Tree = ({ children, topLevelParent, onClick, style }) => {
   const tree = children.map(l => {
     let children
     if (l.children.length > 0) {
-      children = <Tree children={l.children} onClick={onClick} />
+      children = (
+        <Tree children={l.children} onClick={onClick} topLevelParent={false} />
+      )
     }
+
+    const { Div } = createStyledElement
 
     return (
       <ListItem
@@ -357,13 +365,13 @@ const Tree = ({ children, onClick, style }) => {
         }}
         key={l.self}
         selected={false}
+        topLevelParent={topLevelParent}
       >
-        <strong>{l.name}</strong>
-        {" "}
-        -
-        {" "}
-        <small style={{ color: "#aaa" }}>/{l.path.join("/")}</small>
-        {children}
+        {l.name}
+        {children &&
+          <Div css={{ margin: "8px 4px" }}>
+            {children}
+          </Div>}
       </ListItem>
     )
   })
@@ -378,7 +386,7 @@ const Tree = ({ children, onClick, style }) => {
 const Link = ({ url, onClick, current, children }) => {
   const style = {
     padding: "0.5rem",
-    borderLeft: current ? "5px solid blue" : ""
+    borderLeft: current ? "5px solid blue" : "",
   }
 
   return (

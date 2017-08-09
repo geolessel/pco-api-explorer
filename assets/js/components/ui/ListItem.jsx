@@ -1,7 +1,7 @@
 import PropTypes from "prop-types"
 import createStyledElement from "create-styled-element"
 
-const ListItem = ({ link, selected, ...props }) => {
+const ListItem = ({ link, selected, topLevelParent, ...props }) => {
   const styles = {
     borderBottom: "1px solid #eeeeee",
     borderLeft: "1px solid #eeeeee",
@@ -15,8 +15,10 @@ const ListItem = ({ link, selected, ...props }) => {
     },
   }
   const dynamic = {
+    borderRight: "1px solid #eeeeee",
     ...(link && { "&:hover": { background: "#fafafa", cursor: "pointer" } }),
     ...(selected && { background: "#f7f7f7" }),
+    ...(topLevelParent && { borderRight: "none" }),
   }
   return createStyledElement("div", props)(styles, dynamic)
 }
