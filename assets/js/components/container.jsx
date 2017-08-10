@@ -2,7 +2,9 @@ import React from "react"
 import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
 import createStyledElement from "create-styled-element"
-import ListItem from "./ui/ListItem"
+import ListItem from "./ui/list_item"
+import NavLink from "./ui/nav_link"
+import LabelInput from "./ui/label_input"
 
 const base64 = require("base-64")
 const defaultPerPage = 25
@@ -14,7 +16,7 @@ const Headline = props => {
     color: "#333333",
     fontSize: "18px",
     lineHeight: "24px",
-    margin: "0 0 32px",
+    margin: "0 0 24px",
   }
   return createStyledElement("h1", props)(styles)
 }
@@ -22,6 +24,18 @@ const Headline = props => {
 const OptionsLabel = props => {
   const styles = { display: "block" }
   return createStyledElement("label", props)(styles)
+}
+
+const Pane = props => {
+  const styles = {
+    border: "1px solid #eeeeee",
+    borderRadius: "3px",
+    background: "#ffffff",
+    marginBottom: "16px",
+    padding: "15px",
+    ":last-child": { marginBottom: "0" },
+  }
+  return createStyledElement("div", props)(styles)
 }
 
 class API {
@@ -129,12 +143,19 @@ class Container extends React.Component {
 
     return (
       <Div css={{ display: "flex" }}>
-        <Div css={{ flexBasis: "200px", padding: "32px 0 0" }}>
+        <Div
+          css={{
+            borderLeft: "1px solid #eeeeee",
+            flexBasis: "200px",
+            padding: "32px 0 0",
+          }}
+        >
           <Headline>API Tree</Headline>
           <Tree
             children={tree.children}
             onClick={this.handleLinkClick}
             key={tree.self}
+            current={this.state.current}
             topLevelParent
           />
         </Div>
@@ -174,7 +195,7 @@ class Container extends React.Component {
             <Div
               css={{
                 flex: "1",
-                marginRight: "32px",
+                margin: "16px 32px 0 0",
                 minWidth: "0",
                 overflow: "hidden",
                 textOverflow: "ellipses",
@@ -343,7 +364,7 @@ class Container extends React.Component {
   }
 }
 
-const Tree = ({ children, topLevelParent, onClick, style }) => {
+const Tree = ({ children, current, topLevelParent, onClick, style }) => {
   const tree = children.map(l => {
     let children
     if (l.children.length > 0) {
@@ -355,43 +376,29 @@ const Tree = ({ children, topLevelParent, onClick, style }) => {
     const { Div } = createStyledElement
 
     return (
-      <ListItem
-        link
-        url={l.self}
-        onClick={e => {
-          e.preventDefault()
-          e.stopPropagation()
-          onClick(l.self)
-        }}
-        key={l.self}
-        selected={false}
-        topLevelParent={topLevelParent}
-      >
-        {l.name}
-        {children &&
-          <Div css={{ margin: "8px 4px" }}>
-            {children}
-          </Div>}
-      </ListItem>
+      <div>
+        <NavLink
+          link
+          url={l.self}
+          onClick={e => {
+            e.preventDefault()
+            e.stopPropagation()
+            onClick(l.self)
+          }}
+          key={l.self}
+          selected={current === l.self}
+          topLevelParent={topLevelParent}
+        >
+          {l.name}
+        </NavLink>
+        {children}
+      </div>
     )
   })
 
   return (
     <div>
       {tree}
-    </div>
-  )
-}
-
-const Link = ({ url, onClick, current, children }) => {
-  const style = {
-    padding: "0.5rem",
-    borderLeft: current ? "5px solid blue" : "",
-  }
-
-  return (
-    <div onClick={onClick} style={style}>
-      {children}
     </div>
   )
 }
@@ -406,8 +413,8 @@ const Ordering = ({ response, onChange, params }) => {
     )
 
     return (
-      <div>
-        <h3>Ordering</h3>
+      <Pane>
+        <Headline>Ordering</Headline>
         <div>
           <OptionsLabel key={"none"}>
             <input
@@ -421,7 +428,7 @@ const Ordering = ({ response, onChange, params }) => {
           </OptionsLabel>
           {options}
         </div>
-      </div>
+      </Pane>
     )
   } else {
     return null
@@ -431,17 +438,14 @@ const Ordering = ({ response, onChange, params }) => {
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
     const options = response.meta.can_query_by.map(o =>
-      <OptionsLabel key={o}>
-        {o}
-        <input type="text" name={o} onChange={onChange} />
-      </OptionsLabel>
+      <LabelInput key={o} name={o} type="text" onChange={onChange} />
     )
 
     return (
-      <Flex direction="column">
-        <h3>Querying</h3>
+      <Pane>
+        <Headline>Querying</Headline>
         {options}
-      </Flex>
+      </Pane>
     )
   } else {
     return null
@@ -458,12 +462,12 @@ const Including = ({ response, onChange, params }) => {
     )
 
     return (
-      <div>
-        <h3>Including</h3>
+      <Pane>
+        <Headline>Including</Headline>
         <div>
           {options}
         </div>
-      </div>
+      </Pane>
     )
   } else {
     return null
@@ -480,12 +484,12 @@ const Filtering = ({ response, onChange, params }) => {
     )
 
     return (
-      <div>
-        <h3>Filtering</h3>
+      <Pane>
+        <Headline>Filtering</Headline>
         <div>
           {options}
         </div>
-      </div>
+      </Pane>
     )
   } else {
     return null
@@ -494,29 +498,25 @@ const Filtering = ({ response, onChange, params }) => {
 
 const Limiting = ({ response, onChange, params }) => {
   return (
-    <div>
-      <h3>Limiting</h3>
-      <div>
-        <label htmlFor="page">Page:</label>
-        {" "}
-        <input
-          type="text"
-          name="page"
-          value={params.page}
-          onChange={onChange}
-        />
-      </div>
-      <div>
-        <label htmlFor="perPage">Per page:</label>
-        {" "}
-        <input
-          type="text"
-          name="per_page"
-          value={params.per_page}
-          onChange={onChange}
-        />
-      </div>
-    </div>
+    <Pane>
+      <Headline>Limiting</Headline>
+      <LabelInput
+        onChange={onChange}
+        name="page"
+        type="text"
+        value={params.page}
+      >
+        Page:
+      </LabelInput>
+      <LabelInput
+        onChange={onChange}
+        name="per_page"
+        type="text"
+        value={params.per_page}
+      >
+        Per page:
+      </LabelInput>
+    </Pane>
   )
 }
 
