@@ -3,6 +3,7 @@ import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
 import createStyledElement from "create-styled-element"
 import ListItem from "./ui/ListItem"
+import NavLink from "./ui/NavLink"
 
 const base64 = require("base-64")
 const defaultPerPage = 25
@@ -129,12 +130,19 @@ class Container extends React.Component {
 
     return (
       <Div css={{ display: "flex" }}>
-        <Div css={{ flexBasis: "200px", padding: "32px 0 0" }}>
+        <Div
+          css={{
+            borderLeft: "1px solid #eeeeee",
+            flexBasis: "200px",
+            padding: "32px 0 0",
+          }}
+        >
           <Headline>API Tree</Headline>
           <Tree
             children={tree.children}
             onClick={this.handleLinkClick}
             key={tree.self}
+            current={this.state.current}
             topLevelParent
           />
         </Div>
@@ -174,7 +182,7 @@ class Container extends React.Component {
             <Div
               css={{
                 flex: "1",
-                marginRight: "32px",
+                margin: "16px 32px 0 0",
                 minWidth: "0",
                 overflow: "hidden",
                 textOverflow: "ellipses",
@@ -343,7 +351,7 @@ class Container extends React.Component {
   }
 }
 
-const Tree = ({ children, topLevelParent, onClick, style }) => {
+const Tree = ({ children, current, topLevelParent, onClick, style }) => {
   const tree = children.map(l => {
     let children
     if (l.children.length > 0) {
@@ -355,43 +363,29 @@ const Tree = ({ children, topLevelParent, onClick, style }) => {
     const { Div } = createStyledElement
 
     return (
-      <ListItem
-        link
-        url={l.self}
-        onClick={e => {
-          e.preventDefault()
-          e.stopPropagation()
-          onClick(l.self)
-        }}
-        key={l.self}
-        selected={false}
-        topLevelParent={topLevelParent}
-      >
-        {l.name}
-        {children &&
-          <Div css={{ margin: "8px 4px" }}>
-            {children}
-          </Div>}
-      </ListItem>
+      <div>
+        <NavLink
+          link
+          url={l.self}
+          onClick={e => {
+            e.preventDefault()
+            e.stopPropagation()
+            onClick(l.self)
+          }}
+          key={l.self}
+          selected={current === l.self}
+          topLevelParent={topLevelParent}
+        >
+          {l.name}
+        </NavLink>
+        {children}
+      </div>
     )
   })
 
   return (
     <div>
       {tree}
-    </div>
-  )
-}
-
-const Link = ({ url, onClick, current, children }) => {
-  const style = {
-    padding: "0.5rem",
-    borderLeft: current ? "5px solid blue" : "",
-  }
-
-  return (
-    <div onClick={onClick} style={style}>
-      {children}
     </div>
   )
 }
@@ -493,9 +487,18 @@ const Filtering = ({ response, onChange, params }) => {
 }
 
 const Limiting = ({ response, onChange, params }) => {
+  const { Div } = createStyledElement
+
   return (
-    <div>
-      <h3>Limiting</h3>
+    <Div
+      css={{
+        border: "1px solid #eeeeee",
+        borderRadius: "3px",
+        background: "#ffffff",
+        padding: "15px",
+      }}
+    >
+      <Headline>Limiting</Headline>
       <div>
         <label htmlFor="page">Page:</label>
         {" "}
@@ -516,7 +519,7 @@ const Limiting = ({ response, onChange, params }) => {
           onChange={onChange}
         />
       </div>
-    </div>
+    </Div>
   )
 }
 
