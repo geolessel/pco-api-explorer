@@ -6,38 +6,14 @@ import _ from "underscore"
 import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
 import LabelInput from "./ui/label_input"
+import Headline from "./ui/headline"
+import OptionsLabel from "./ui/option_label"
+import Pane from "./ui/pane"
 
 const base64 = require("base-64")
 const defaultPerPage = 25
 const defaultOffset = 0
 const defaultParams = { per_page: defaultPerPage, offset: defaultOffset }
-
-const Headline = props => {
-  const styles = {
-    color: "#333333",
-    fontSize: "18px",
-    lineHeight: "24px",
-    margin: "0 0 24px"
-  }
-  return createStyledElement("h1", props)(styles)
-}
-
-const OptionsLabel = props => {
-  const styles = { display: "block" }
-  return createStyledElement("label", props)(styles)
-}
-
-const Pane = props => {
-  const styles = {
-    border: "1px solid #eeeeee",
-    borderRadius: "3px",
-    background: "#ffffff",
-    marginBottom: "16px",
-    padding: "15px",
-    ":last-child": { marginBottom: "0" }
-  }
-  return createStyledElement("div", props)(styles)
-}
 
 class API {
   static get(url, callback) {
@@ -45,8 +21,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
