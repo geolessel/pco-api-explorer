@@ -2,9 +2,9 @@ import React from "react"
 import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
 import createStyledElement from "create-styled-element"
-import ListItem from "./ui/ListItem"
-import NavLink from "./ui/NavLink"
-import LabelInput from "./ui/LabelInput"
+import ListItem from "./ui/list_item"
+import NavLink from "./ui/nav_link"
+import LabelInput from "./ui/label_input"
 
 const base64 = require("base-64")
 const defaultPerPage = 25
