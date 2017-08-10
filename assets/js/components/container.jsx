@@ -140,7 +140,7 @@ class Container extends React.Component {
             children={tree.children}
             onClick={this.handleLinkClick}
             key={tree.self}
-            current={this.state.current}
+            current={this.computePath(current)}
           />
         </Div>
         <Div
@@ -454,6 +454,7 @@ const Tree = ({ children, current, onClick, style }) => {
           key={`${l.path.toString()}-children`}
           children={_.uniq(l.children, false, c => c.name)}
           onClick={onClick}
+          current={current}
         />
       )
     }
@@ -471,7 +472,7 @@ const Tree = ({ children, current, onClick, style }) => {
             onClick(l.self)
           }}
           key={l.path.toString()}
-          selected={current === l.self}
+          selected={current.toString() === l.path.toString()}
           level={l.path.length}
         >
           {l.name}
