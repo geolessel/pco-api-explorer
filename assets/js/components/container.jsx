@@ -17,7 +17,7 @@ const Headline = props => {
     color: "#333333",
     fontSize: "18px",
     lineHeight: "24px",
-    margin: "0 0 24px"
+    margin: "0 0 24px",
   }
   return createStyledElement("h1", props)(styles)
 }
@@ -34,7 +34,7 @@ const Pane = props => {
     background: "#ffffff",
     marginBottom: "16px",
     padding: "15px",
-    ":last-child": { marginBottom: "0" }
+    ":last-child": { marginBottom: "0" },
   }
   return createStyledElement("div", props)(styles)
 }
@@ -45,8 +45,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -80,7 +80,7 @@ class Container extends React.Component {
       links: [],
       response: {},
       current: startingUrl,
-      params: defaultParams
+      params: defaultParams,
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -105,13 +105,13 @@ class Container extends React.Component {
         name: "people",
         self: response.data.links.self,
         children: this.createChildren({ response }),
-        path: this.computePath(response.data.links.self)
+        path: this.computePath(response.data.links.self),
       })
 
       this.setState({
         response: response,
         links: response.data.links,
-        tree: node
+        tree: node,
       })
     })
   }
@@ -130,7 +130,7 @@ class Container extends React.Component {
           css={{
             borderLeft: "1px solid #eeeeee",
             flexBasis: "200px",
-            padding: "32px 0 0"
+            padding: "32px 0 0",
           }}
         >
           <Headline>API Tree</Headline>
@@ -139,14 +139,13 @@ class Container extends React.Component {
             onClick={this.handleLinkClick}
             key={tree.self}
             current={this.state.current}
-            topLevelParent
           />
         </Div>
         <Div
           css={{
             background: "#f7f7f7",
             flex: "1",
-            padding: "32px"
+            padding: "32px",
           }}
         >
           <Div
@@ -154,7 +153,7 @@ class Container extends React.Component {
               background: "#fafafa",
               border: "1px solid #eeeeee",
               borderRadius: "3px",
-              padding: "15px"
+              padding: "15px",
             }}
           >
             <Headline css={{ display: "flex", margin: "0" }}>
@@ -166,7 +165,7 @@ class Container extends React.Component {
                   fontSize: "14px",
                   lineHeight: "16px",
                   margin: "-2px 0 -2px 8px",
-                  padding: "4px"
+                  padding: "4px",
                 }}
                 readOnly={true}
                 type="text"
@@ -182,7 +181,7 @@ class Container extends React.Component {
                 minWidth: "0",
                 overflow: "hidden",
                 textOverflow: "ellipses",
-                whiteSpace: "nowrap"
+                whiteSpace: "nowrap",
               }}
             >
               <Ordering {...this.state} onChange={this.handleOrderingChange} />
@@ -227,7 +226,7 @@ class Container extends React.Component {
               name: k,
               self: data.links[k],
               children: [],
-              path: this.computePath(data.links[k])
+              path: this.computePath(data.links[k]),
             })
           }
         })
@@ -239,7 +238,7 @@ class Container extends React.Component {
             name: d.type,
             self: d.links.self,
             children: [],
-            path: this.computePath(d.links.self)
+            path: this.computePath(d.links.self),
           })
       )
     }
@@ -318,7 +317,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included
+      include: included,
     })
 
     this.updateParams(params)
@@ -336,7 +335,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered
+      filter: filtered,
     })
 
     this.updateParams(params)
@@ -438,17 +437,12 @@ class Container extends React.Component {
   }
 }
 
-const Tree = ({ children, current, topLevelParent, onClick, style }) => {
+const Tree = ({ children, current, onClick, style }) => {
   const tree = children.map(l => {
     let children
     if (l.children.length > 0) {
       children = (
-        <Tree
-          key={`${l.self}1`}
-          children={l.children}
-          onClick={onClick}
-          topLevelParent={false}
-        />
+        <Tree key={`${l.self}1`} children={l.children} onClick={onClick} />
       )
     }
 
@@ -466,7 +460,6 @@ const Tree = ({ children, current, topLevelParent, onClick, style }) => {
           }}
           key={l.self}
           selected={current === l.self}
-          topLevelParent={topLevelParent}
           level={l.path.length}
         >
           {l.name}
@@ -485,12 +478,12 @@ const Tree = ({ children, current, topLevelParent, onClick, style }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o => (
+    const options = response.meta.can_order_by.map(o =>
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -517,9 +510,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o => (
+    const options = response.meta.can_query_by.map(o =>
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    ))
+    )
 
     return (
       <Pane>
@@ -534,12 +527,12 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o => (
+    const options = response.meta.can_include.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -556,12 +549,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o => (
+    const options = response.meta.can_filter.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -612,7 +605,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px"
+            padding: "4px",
           }}
           readOnly={true}
           type="text"
