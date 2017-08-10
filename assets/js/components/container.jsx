@@ -2,21 +2,22 @@ import React from "react"
 import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
 import createStyledElement from "create-styled-element"
+import _ from "underscore"
 import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
 import LabelInput from "./ui/label_input"
 
 const base64 = require("base-64")
 const defaultPerPage = 25
-const defaultPage = 1
-const defaultParams = { per_page: defaultPerPage, page: defaultPage }
+const defaultOffset = 0
+const defaultParams = { per_page: defaultPerPage, offset: defaultOffset }
 
 const Headline = props => {
   const styles = {
     color: "#333333",
     fontSize: "18px",
     lineHeight: "24px",
-    margin: "0 0 24px",
+    margin: "0 0 24px"
   }
   return createStyledElement("h1", props)(styles)
 }
@@ -33,21 +34,23 @@ const Pane = props => {
     background: "#ffffff",
     marginBottom: "16px",
     padding: "15px",
-    ":last-child": { marginBottom: "0" },
+    ":last-child": { marginBottom: "0" }
   }
   return createStyledElement("div", props)(styles)
 }
 
 class API {
   static get(url, callback) {
+    console.groupCollapsed("API.get")
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`,
-      }),
+        Authorization: `Basic ${API.key}`
+      })
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
+    console.groupEnd()
   }
 }
 
@@ -77,7 +80,7 @@ class Container extends React.Component {
       links: [],
       response: {},
       current: startingUrl,
-      params: { per_page: defaultPerPage, page: defaultPage },
+      params: defaultParams
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -96,45 +99,25 @@ class Container extends React.Component {
     this.computePath = this.computePath.bind(this)
   }
 
-  createChildren({ response }) {
-    const { data } = response
-    if (data.links) {
-      return Object.keys(data.links).map(k => {
-        return new Node({
-          name: k,
-          self: data.links[k],
-          children: [],
-          path: this.computePath(data.links[k]),
-        })
-      })
-    } else if (Array.isArray(data)) {
-      return data.map(
-        d =>
-          new Node({
-            name: d.type,
-            self: d.links.self,
-            children: [],
-            path: this.computePath(d.links.self),
-          })
-      )
-    }
-  }
-
   componentDidMount() {
     API.get(this.state.current, response => {
       const node = new Node({
         name: "people",
         self: response.data.links.self,
         children: this.createChildren({ response }),
-        path: this.computePath(response.data.links.self),
+        path: this.computePath(response.data.links.self)
       })
 
       this.setState({
         response: response,
         links: response.data.links,
-        tree: node,
+        tree: node
       })
     })
+  }
+
+  shouldComponentUpdate() {
+    return true
   }
 
   render() {
@@ -147,7 +130,7 @@ class Container extends React.Component {
           css={{
             borderLeft: "1px solid #eeeeee",
             flexBasis: "200px",
-            padding: "32px 0 0",
+            padding: "32px 0 0"
           }}
         >
           <Headline>API Tree</Headline>
@@ -163,7 +146,7 @@ class Container extends React.Component {
           css={{
             background: "#f7f7f7",
             flex: "1",
-            padding: "32px",
+            padding: "32px"
           }}
         >
           <Div
@@ -171,7 +154,7 @@ class Container extends React.Component {
               background: "#fafafa",
               border: "1px solid #eeeeee",
               borderRadius: "3px",
-              padding: "15px",
+              padding: "15px"
             }}
           >
             <Headline css={{ display: "flex", margin: "0" }}>
@@ -183,7 +166,7 @@ class Container extends React.Component {
                   fontSize: "14px",
                   lineHeight: "16px",
                   margin: "-2px 0 -2px 8px",
-                  padding: "4px",
+                  padding: "4px"
                 }}
                 readOnly={true}
                 type="text"
@@ -199,7 +182,7 @@ class Container extends React.Component {
                 minWidth: "0",
                 overflow: "hidden",
                 textOverflow: "ellipses",
-                whiteSpace: "nowrap",
+                whiteSpace: "nowrap"
               }}
             >
               <Ordering {...this.state} onChange={this.handleOrderingChange} />
@@ -234,10 +217,66 @@ class Container extends React.Component {
     )
   }
 
+  createChildren({ response }) {
+    const { data } = response
+    if (data.links) {
+      return _.compact(
+        Object.keys(data.links).map(k => {
+          if (k !== "self") {
+            return new Node({
+              name: k,
+              self: data.links[k],
+              children: [],
+              path: this.computePath(data.links[k])
+            })
+          }
+        })
+      )
+    } else if (Array.isArray(data)) {
+      return data.map(
+        d =>
+          new Node({
+            name: d.type,
+            self: d.links.self,
+            children: [],
+            path: this.computePath(d.links.self)
+          })
+      )
+    }
+  }
+
+  findParentNode(url) {
+    const { tree } = this.state
+    const pathOfParent = this.computePath(url)
+    console.log("looking for ", pathOfParent.toString())
+    let parent
+    tree.children.some(c => {
+      console.log("checking", c.path.toString())
+      if (c.children.length > 0) {
+        c.children.some(g => {
+          console.log("checking child", g.path.toString())
+          if (g.path.toString() == pathOfParent.toString()) {
+            parent = g
+            return true
+          }
+        })
+      }
+      if (c.path.toString() == pathOfParent.toString()) {
+        parent = c
+        return true
+      }
+    })
+    console.log("parent of ", url, " is ", parent)
+    return parent
+  }
+
   handleLinkClick(current) {
+    console.groupCollapsed("handleLinkClick")
     console.log("click", current)
-    this.setState({ current })
-    this.updateParams(defaultParams)
+    this.setState({ current, params: defaultParams }, () => {
+      this.updateParams({})
+    })
+    console.groupEnd()
   }
 
   handleOrderingChange(e) {
@@ -279,7 +318,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included,
+      include: included
     })
 
     this.updateParams(params)
@@ -297,14 +336,20 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered,
+      filter: filtered
     })
 
     this.updateParams(params)
   }
 
   handleLimitingChange(e) {
-    const { name, value } = e.target
+    let { name, value } = e.target
+    if (name == "offset" && value == "") {
+      value = defaultOffset
+    }
+    if (name == "per_page" && value == "") {
+      value = defaultPerPage
+    }
     let params = this.state.params
     params = Object.assign(params, { [name]: value })
     this.updateParams(params)
@@ -318,19 +363,45 @@ class Container extends React.Component {
     this.setState({ params }, () => {
       const current = this.currentURLWithExtraParams()
       API.get(current, response => {
+        console.groupCollapsed("updateParams")
         // TODO use underscore or something for this deep merge? Sheesh.
-        let parent = this.findNodeBySelf(current)
+        let parent = this.findParentNode(current)
         let tree = this.state.tree
         if (parent) {
           parent.children = this.createChildren({ response })
-          const index = tree.children.indexOf(parent)
-          const child = Object.assign(tree.children[index], parent)
-          const children = Object.assign(tree.children, children)
-          tree = Object.assign(tree, children)
+          console.log("parent", parent)
+          // const index = tree.children.indexOf(parent)
+          const index = this.recursivelyFindByPath(parent.path, tree)
+          console.log("index", index)
+          // const child = Object.assign(tree.children[index], parent)
+          // const children = Object.assign(tree.children, children)
+          // tree = Object.assign(tree, children)
         }
         this.setState({ current, response, tree })
+        console.groupEnd()
       })
     })
+  }
+
+  recursivelyFindByPath(pathNeedle, nodeHaystack) {
+    console.groupCollapsed("recursivelyFindByPath")
+    let match
+    console.log("looking for", pathNeedle.toString())
+    nodeHaystack.children.some(c => {
+      const pathString = c.path.toString()
+      console.log("checking", pathString)
+      if (pathNeedle.toString() == pathString) {
+        match = c
+        return true
+      } else {
+        if (c.children.length > 0) {
+          match = this.recursivelyFindByPath(pathNeedle, c)
+        }
+      }
+      return match
+    })
+    console.groupEnd()
+    return match
   }
 
   currentURLWithExtraParams(extraParams = {}) {
@@ -339,8 +410,8 @@ class Container extends React.Component {
     if (params.per_page == defaultPerPage) {
       delete params.per_page
     }
-    if (params.page == defaultPage) {
-      delete params.page
+    if (params.offset == defaultOffset) {
+      delete params.offset
     }
     params = Object.keys(params).map(k => `${k}=${params[k]}`).join("&")
     if (Object.keys(params).length > 0) {
@@ -355,6 +426,9 @@ class Container extends React.Component {
   }
 
   computePath(link) {
+    if (link === null) {
+      return []
+    }
     let path = link
       .replace(this.state.baseUrl, "")
       .replace(/\/\d+(\/)*/g, "/:id$1")
@@ -369,14 +443,19 @@ const Tree = ({ children, current, topLevelParent, onClick, style }) => {
     let children
     if (l.children.length > 0) {
       children = (
-        <Tree children={l.children} onClick={onClick} topLevelParent={false} />
+        <Tree
+          key={`${l.self}1`}
+          children={l.children}
+          onClick={onClick}
+          topLevelParent={false}
+        />
       )
     }
 
     const { Div } = createStyledElement
 
     return (
-      <div>
+      <div style={{}}>
         <NavLink
           link
           url={l.self}
@@ -388,6 +467,7 @@ const Tree = ({ children, current, topLevelParent, onClick, style }) => {
           key={l.self}
           selected={current === l.self}
           topLevelParent={topLevelParent}
+          level={l.path.length}
         >
           {l.name}
         </NavLink>
@@ -405,12 +485,12 @@ const Tree = ({ children, current, topLevelParent, onClick, style }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o =>
+    const options = response.meta.can_order_by.map(o => (
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -437,9 +517,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o =>
+    const options = response.meta.can_query_by.map(o => (
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    )
+    ))
 
     return (
       <Pane>
@@ -454,12 +534,12 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o =>
+    const options = response.meta.can_include.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -476,12 +556,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o =>
+    const options = response.meta.can_filter.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -502,16 +582,16 @@ const Limiting = ({ response, onChange, params }) => {
       <Headline>Limiting</Headline>
       <LabelInput
         onChange={onChange}
-        name="page"
-        type="text"
-        value={params.page}
+        name="offset"
+        type="number"
+        value={params.offset}
       >
-        Page:
+        Offset:
       </LabelInput>
       <LabelInput
         onChange={onChange}
         name="per_page"
-        type="text"
+        type="number"
         value={params.per_page}
       >
         Per page:
@@ -532,7 +612,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px",
+            padding: "4px"
           }}
           readOnly={true}
           type="text"
