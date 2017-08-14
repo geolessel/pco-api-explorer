@@ -3,20 +3,6 @@ import PropTypes from "prop-types"
 import createStyledElement from "create-styled-element"
 import CaretDownIcon from "../icons/caret_down_icon"
 
-const NavLink = ({ children, level, ...props }) => {
-  return (
-    <Link {...props} level={level}>
-      {level === 1 && <CaretToggle color="#aaaaaa" />}
-      <span>{children}</span>
-    </Link>
-  )
-}
-
-NavLink.propTypes = {
-  link: PropTypes.bool,
-  selected: PropTypes.bool
-}
-
 const Link = ({ level, selected, ...props }) => {
   const styles = {
     fontSize: "12px",
@@ -52,6 +38,20 @@ const CaretToggle = ({ expanded, ...props }) => {
     transform: "rotate(-90deg)"
   }
   return createStyledElement(CaretDownIcon, props)(styles, dynamic)
+}
+
+const NavLink = ({ children, level, ...props }) => {
+  return (
+    <Link {...props} level={level}>
+      {level === 1 && <CaretToggle color="#aaaaaa" />}
+      <span>{children}</span>
+    </Link>
+  )
+}
+
+NavLink.propTypes = {
+  link: PropTypes.bool,
+  selected: PropTypes.bool
 }
 
 export default NavLink
