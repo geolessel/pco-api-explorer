@@ -15,6 +15,28 @@ const defaultPerPage = 25
 const defaultOffset = 0
 const defaultParams = { per_page: defaultPerPage, offset: defaultOffset }
 
+const log = true
+// const log = false
+const console = {
+  groupCollapsed(name) {
+    if (log) {
+      window.console.groupCollapsed(name)
+    }
+  },
+
+  groupEnd() {
+    if (log) {
+      window.console.groupEnd()
+    }
+  },
+
+  log(terms) {
+    if (log) {
+      window.console.log(terms)
+    }
+  }
+}
+
 class API {
   static get(url, callback) {
     console.groupCollapsed("API.get")
@@ -46,39 +68,35 @@ class Container extends React.Component {
     super(props)
 
     this.apiRoot = `http://api.pco.dev`
-    const startingUrl = `${this.apiRoot}/people/v2`
-    const startingApp = "people"
-    const startingVersion = 2
+    this.apiVersion = "v2"
     const startingTree = [
       new Node({
         name: "check_ins",
-        self: `${this.apiRoot}/check_ins/v2`,
+        self: `${this.apiRoot}/check_ins/${this.apiVersion}`,
         children: [],
-        path: ["check_ins", "v2"]
+        path: ["check_ins", this.apiVersion]
       }),
       new Node({
         name: "giving",
-        self: `${this.apiRoot}/giving/v2`,
+        self: `${this.apiRoot}/giving/${this.apiVersion}`,
         children: [],
-        path: ["giving", "v2"]
+        path: ["giving", this.apiVersion]
       }),
       new Node({
         name: "people",
-        self: `${this.apiRoot}/people/v2`,
+        self: `${this.apiRoot}/people/${this.apiVersion}`,
         children: [],
-        path: ["people", "v2"]
+        path: ["people", this.apiVersion]
       }),
       new Node({
         name: "services",
-        self: `${this.apiRoot}/services/v2`,
+        self: `${this.apiRoot}/services/${this.apiVersion}`,
         children: [],
-        path: ["services", "v2"]
+        path: ["services", this.apiVersion]
       })
     ]
 
     this.state = {
-      app: startingApp,
-      version: startingVersion,
       tree: { children: startingTree },
       baseUrl: `${this.apiRoot}`,
       links: [],
