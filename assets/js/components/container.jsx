@@ -7,10 +7,11 @@ import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
 import LabelInput from "./ui/label_input"
 import Headline from "./ui/headline"
-import OptionsLabel from "./ui/option_label"
+import OptionsLabel from "./ui/options_label"
 import Pane from "./ui/pane"
 
 const base64 = require("base-64")
+const merge = require("deepmerge")
 const defaultPerPage = 25
 const defaultOffset = 0
 const defaultParams = { per_page: defaultPerPage, offset: defaultOffset }
@@ -21,8 +22,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`,
-      }),
+        Authorization: `Basic ${API.key}`
+      })
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -49,12 +50,20 @@ class Container extends React.Component {
     const startingUrl = `${this.apiRoot}/people/v2`
     const startingApp = "people"
     const startingVersion = 2
+    const startingTree = [
+      new Node({
+        name: "people",
+        self: `${this.apiRoot}/people/v2`,
+        children: [],
+        path: ["people", "v2"]
+      })
+    ]
 
     this.state = {
       app: startingApp,
       version: startingVersion,
-      tree: { children: [] },
-      baseUrl: `${this.apiRoot}/${startingApp}/v${startingVersion}`,
+      tree: { children: startingTree },
+      baseUrl: `${this.apiRoot}`,
       links: [],
       response: {},
       current: startingUrl,
@@ -79,17 +88,10 @@ class Container extends React.Component {
 
   componentDidMount() {
     API.get(this.state.current, response => {
-      const node = new Node({
-        name: "people",
-        self: response.data.links.self,
-        children: this.createChildren({ response }),
-        path: this.computePath(response.data.links.self)
-      })
-
+      this.createChildren({ response })
       this.setState({
         response: response,
-        links: response.data.links,
-        tree: node
+        links: response.data.links
       })
     })
   }
@@ -196,33 +198,44 @@ class Container extends React.Component {
 
   createChildren({ response }) {
     const { data } = response
+    const { tree } = this.state
     if (data.links) {
-      return _.compact(
-        Object.keys(data.links).map(k => {
-          if (k !== "self") {
-            const path = this.computePath(data.links[k])
-            const name = path.slice(-1).toString() == ":id" ? "<id>" : k
-            return new Node({
-              self: data.links[k],
+      Object.keys(data.links).map(k => {
+        if (k !== "self") {
+          const path = this.computePath(data.links[k])
+          const name = path.slice(-1).toString() == ":id" ? "<id>" : k
+          const parent = this.recursivelyFindByPath(path.slice(0, -1), tree)
+
+          if (parent) {
+            parent.children.push(
+              new Node({
+                self: data.links[k],
+                children: [],
+                id: Number(data.id),
+                name,
+                path
+              })
+            )
+          }
+        }
+      })
+    } else if (Array.isArray(data)) {
+      data.forEach(d => {
+        const path = this.computePath(d.links.self)
+        const name = path.slice(-1).toString() == ":id" ? "<id>" : d.type
+        const parent = this.recursivelyFindByPath(path.slice(0, -1), tree)
+
+        if (parent) {
+          parent.children.push(
+            new Node({
+              self: d.links.self,
               children: [],
-              id: Number(data.id),
+              id: Number(d.id),
               name,
               path
             })
-          }
-        })
-      )
-    } else if (Array.isArray(data)) {
-      return data.map(d => {
-        const path = this.computePath(d.links.self)
-        const name = path.slice(-1).toString() == ":id" ? "<id>" : d.type
-        return new Node({
-          self: d.links.self,
-          children: [],
-          id: Number(d.id),
-          name,
-          path
-        })
+          )
+        }
       })
     }
   }
@@ -346,20 +359,8 @@ class Container extends React.Component {
       const current = this.currentURLWithExtraParams()
       API.get(current, response => {
         console.groupCollapsed("updateParams")
-        // TODO use underscore or something for this deep merge? Sheesh.
-        let parent = this.findParentNode(current)
         let tree = this.state.tree
-        if (parent) {
-          parent.children = this.createChildren({ response })
-          parent.childrenIds = parent.children.map(c => c.id)
-          console.log("parent", parent)
-          // const index = tree.children.indexOf(parent)
-          const index = this.recursivelyFindByPath(parent.path, tree)
-          console.log("index", index)
-          // const child = Object.assign(tree.children[index], parent)
-          // const children = Object.assign(tree.children, children)
-          // tree = Object.assign(tree, children)
-        }
+        this.createChildren({ response })
         this.setState({ current, response, tree })
         console.groupEnd()
       })
