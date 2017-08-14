@@ -11,7 +11,6 @@ import OptionsLabel from "./ui/options_label"
 import Pane from "./ui/pane"
 
 const base64 = require("base-64")
-const merge = require("deepmerge")
 const defaultPerPage = 25
 const defaultOffset = 0
 const defaultParams = { per_page: defaultPerPage, offset: defaultOffset }
@@ -52,10 +51,28 @@ class Container extends React.Component {
     const startingVersion = 2
     const startingTree = [
       new Node({
+        name: "check_ins",
+        self: `${this.apiRoot}/check_ins/v2`,
+        children: [],
+        path: ["check_ins", "v2"]
+      }),
+      new Node({
+        name: "giving",
+        self: `${this.apiRoot}/giving/v2`,
+        children: [],
+        path: ["giving", "v2"]
+      }),
+      new Node({
         name: "people",
         self: `${this.apiRoot}/people/v2`,
         children: [],
         path: ["people", "v2"]
+      }),
+      new Node({
+        name: "services",
+        self: `${this.apiRoot}/services/v2`,
+        children: [],
+        path: ["services", "v2"]
       })
     ]
 
@@ -66,7 +83,7 @@ class Container extends React.Component {
       baseUrl: `${this.apiRoot}`,
       links: [],
       response: {},
-      current: startingUrl,
+      current: "",
       params: defaultParams
     }
 
@@ -84,16 +101,6 @@ class Container extends React.Component {
     this.findNodeBySelf = this.findNodeBySelf.bind(this)
     this.baseUrl = this.baseUrl.bind(this)
     this.computePath = this.computePath.bind(this)
-  }
-
-  componentDidMount() {
-    API.get(this.state.current, response => {
-      this.createChildren({ response })
-      this.setState({
-        response: response,
-        links: response.data.links
-      })
-    })
   }
 
   shouldComponentUpdate() {
@@ -450,7 +457,7 @@ const Tree = ({ children, current, onClick, style }) => {
           }}
           key={l.path.toString()}
           selected={current.toString() === l.path.toString()}
-          level={l.path.length}
+          level={l.path.length - 1}
         >
           {l.name}
         </NavLink>
