@@ -4,14 +4,18 @@ import ReactJsonView from "react-json-view"
 import createStyledElement from "create-styled-element"
 import _ from "underscore"
 import ReactLoading from "react-loading" // https://github.com/fakiolinho/react-loading
+import CopyToClipboard from "react-copy-to-clipboard"
+
+import Button from "./ui/button"
+import Footer from "./ui/footer"
+import Header from "./ui/header"
+import Headline from "./ui/headline"
+import LabelInput from "./ui/label_input"
 import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
-import LabelInput from "./ui/label_input"
-import Header from "./ui/header.jsx"
-import Footer from "./ui/footer.jsx"
-import Headline from "./ui/headline"
 import OptionsLabel from "./ui/options_label"
 import Pane from "./ui/pane"
+import TextWrapper from "./ui/text_wrapper"
 
 const base64 = require("base-64")
 const defaultPerPage = 25
@@ -150,7 +154,7 @@ class Container extends React.Component {
 
   render() {
     const { current, response, tree } = this.state
-    const { Div, Input } = createStyledElement
+    const { Div, Input, Span } = createStyledElement
 
     return (
       <Div
@@ -166,7 +170,7 @@ class Container extends React.Component {
         <Header>PCO API Explorer</Header>
         <Div
           css={{
-            background: "#f7f7f7",
+            background: "#fafafa",
             display: "flex",
             flex: "1"
           }}
@@ -179,34 +183,47 @@ class Container extends React.Component {
               current={this.baseUrl()}
             />
           </Div>
-          <Div css={{ background: "#f7f7f7", flex: "1", padding: "32px" }}>
-            <Div
+          <Div
+            css={{
+              background: "#f7f7f7",
+              flex: "1",
+              minWidth: "0",
+              padding: "32px",
+            }}
+          >
+            <Pane
               css={{
-                background: "#fafafa",
-                border: "1px solid #eeeeee",
-                borderRadius: "3px",
+                alignItems: "flex-start",
+                background: "#eeeeee",
+                display: "flex",
+                lineHeight: "24px",
                 marginBottom: "32px",
-                padding: "15px"
+                minHeight: "24px",
               }}
             >
-              <Headline css={{ display: "flex", margin: "0" }}>
-                <span>Current URL</span>
-                <Input
-                  css={{
-                    color: "#979797",
-                    flex: "1",
-                    fontSize: "14px",
-                    lineHeight: "16px",
-                    margin: "-2px 0 -2px 8px",
-                    padding: "4px"
-                  }}
-                  readOnly={true}
-                  type="text"
-                  value={current}
-                />
-              </Headline>
-            </Div>
-            <Div css={{ display: "flex", flex: "1" }}>
+              <Div css={{ flex: "0 0 auto", fontWeight: "700" }}>
+                Current URL:
+              </Div>
+              {current
+                ? <TextWrapper>{current}</TextWrapper>
+                : <TextWrapper transparent>none selected</TextWrapper>}
+              {current &&
+                <CopyToClipboard
+                  text={current}
+                  onCopy={() => this.setState({ copied: true })}
+                >
+                  <Div css={{ flex: "0 0 auto" }}>
+                    <Button>Copy to clipboard</Button>
+                  </Div>
+                </CopyToClipboard>}
+            </Pane>
+            <Div
+              css={{
+                display: "flex",
+                flex: "1",
+                "@media(max-width: 999px)": { flexDirection: "column" },
+              }}
+            >
               <Div
                 css={{
                   flex: "1",
@@ -214,7 +231,8 @@ class Container extends React.Component {
                   minWidth: "0",
                   overflow: "hidden",
                   textOverflow: "ellipses",
-                  whiteSpace: "nowrap"
+                  whiteSpace: "nowrap",
+                  "@media(max-width: 999px)": { margin: "0 0 32px" },
                 }}
               >
                 <Headline>URL Parameters</Headline>
@@ -254,7 +272,7 @@ class Container extends React.Component {
               </Div>
               <Div css={{ flex: "1", minWidth: "0" }}>
                 <Headline>Server Response</Headline>
-                <Pane theme="dark">
+                <Pane theme="dark" css={{ overflow: "scroll" }}>
                   {this.state.isFetching
                     ? <ReactLoading type="cylon" color="#777" delay={0} />
                     : <ReactJsonView
