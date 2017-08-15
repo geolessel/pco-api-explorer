@@ -9,14 +9,14 @@
 
     <title>Hello ApiExplorer!</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:400,700,700italic,400italic">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:100,400,700,700italic,400italic,100italic">
   </head>
 
   <body>
     <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
     <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
 
-    <main role="main">
+    <main class="content" role="main">
       <%= render @view_module, @view_template, assigns %>
     </main>
 

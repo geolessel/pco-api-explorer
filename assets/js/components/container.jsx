@@ -6,6 +6,8 @@ import _ from "underscore"
 import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
 import LabelInput from "./ui/label_input"
+import Header from "./ui/header.jsx"
+import Footer from "./ui/footer.jsx"
 import Headline from "./ui/headline"
 import OptionsLabel from "./ui/options_label"
 import Pane from "./ui/pane"
@@ -130,93 +132,109 @@ class Container extends React.Component {
     const { Div, Input } = createStyledElement
 
     return (
-      <Div css={{ display: "flex" }}>
+      <Div
+        css={{
+          borderRadius: "4px",
+          display: "flex",
+          overflow: "hidden",
+          flexDirection: "column",
+          margin: "16px 0",
+          minHeight: "calc(100vh - 32px)",
+        }}
+      >
+        <Header>PCO API Explorer</Header>
         <Div
           css={{
-            borderLeft: "1px solid #eeeeee",
-            flexBasis: "200px",
-            padding: "32px 0 0"
-          }}
-        >
-          <Headline>API Tree</Headline>
-          <Tree
-            children={tree.children}
-            onClick={this.handleLinkClick}
-            key={tree.self}
-            current={this.computePath(current)}
-          />
-        </Div>
-        <Div
-          css={{
-            background: "#f7f7f7",
+            background: "#ffffff",
+            display: "flex",
+            height: "100%",
             flex: "1",
-            padding: "32px"
           }}
         >
+          <Div css={{ flexBasis: "200px" }}>
+            <Tree
+              children={tree.children}
+              onClick={this.handleLinkClick}
+              key={tree.self}
+              current={this.computePath(current)}
+            />
+          </Div>
           <Div
             css={{
-              background: "#fafafa",
-              border: "1px solid #eeeeee",
-              borderRadius: "3px",
-              padding: "15px"
+              background: "#f7f7f7",
+              flex: "1",
+              padding: "32px",
             }}
           >
-            <Headline css={{ display: "flex", margin: "0" }}>
-              <span>Current Link</span>
-              <Input
-                css={{
-                  color: "#979797",
-                  flex: "1",
-                  fontSize: "14px",
-                  lineHeight: "16px",
-                  margin: "-2px 0 -2px 8px",
-                  padding: "4px"
-                }}
-                readOnly={true}
-                type="text"
-                value={current}
-              />
-            </Headline>
-          </Div>
-          <Div css={{ display: "flex", flex: "1" }}>
             <Div
               css={{
-                flex: "1",
-                margin: "16px 32px 0 0",
-                minWidth: "0",
-                overflow: "hidden",
-                textOverflow: "ellipses",
-                whiteSpace: "nowrap"
+                background: "#fafafa",
+                border: "1px solid #eeeeee",
+                borderRadius: "3px",
+                padding: "15px",
               }}
             >
-              <Ordering {...this.state} onChange={this.handleOrderingChange} />
-              <Querying
-                {...this.state}
-                onChange={e => this.handleQueryingChange(e)}
-              />
-              <Including
-                {...this.state}
-                onChange={e => this.handleIncludingChange(e)}
-              />
-              <Filtering
-                {...this.state}
-                onChange={e => this.handleFilteringChange(e)}
-              />
-              <Limiting
-                {...this.state}
-                onChange={e => this.handleLimitingChange(e)}
-              />
+              <Headline css={{ display: "flex", margin: "0" }}>
+                <span>Current Link</span>
+                <Input
+                  css={{
+                    color: "#979797",
+                    flex: "1",
+                    fontSize: "14px",
+                    lineHeight: "16px",
+                    margin: "-2px 0 -2px 8px",
+                    padding: "4px",
+                  }}
+                  readOnly={true}
+                  type="text"
+                  value={current}
+                />
+              </Headline>
             </Div>
-            <Div css={{ flex: "1", minWidth: "0" }}>
-              <h3>Server Response</h3>
-              <ReactJsonView
-                src={response}
-                collapsed={1}
-                displayDataTypes={false}
-              />
+            <Div css={{ display: "flex", flex: "1" }}>
+              <Div
+                css={{
+                  flex: "1",
+                  margin: "16px 32px 0 0",
+                  minWidth: "0",
+                  overflow: "hidden",
+                  textOverflow: "ellipses",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Ordering
+                  {...this.state}
+                  onChange={this.handleOrderingChange}
+                />
+                <Querying
+                  {...this.state}
+                  onChange={e => this.handleQueryingChange(e)}
+                />
+                <Including
+                  {...this.state}
+                  onChange={e => this.handleIncludingChange(e)}
+                />
+                <Filtering
+                  {...this.state}
+                  onChange={e => this.handleFilteringChange(e)}
+                />
+                <Limiting
+                  {...this.state}
+                  onChange={e => this.handleLimitingChange(e)}
+                />
+              </Div>
+              <Div css={{ flex: "1", minWidth: "0" }}>
+                <h3>Server Response</h3>
+                <ReactJsonView
+                  src={response}
+                  collapsed={1}
+                  displayDataTypes={false}
+                />
+              </Div>
             </Div>
           </Div>
         </Div>
+        <Footer>That's all folks.</Footer>
       </Div>
     )
   }
