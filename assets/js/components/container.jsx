@@ -19,7 +19,7 @@ const defaultOffset = 0
 const defaultParams = {
   per_page: defaultPerPage,
   offset: defaultOffset,
-  custom: "",
+  custom: ""
 }
 const debounceTime = 500
 
@@ -42,7 +42,7 @@ const console = {
     if (log) {
       window.console.log(terms)
     }
-  },
+  }
 }
 
 class API {
@@ -51,8 +51,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`,
-      }),
+        Authorization: `Basic ${API.key}`
+      })
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -82,26 +82,30 @@ class Container extends React.Component {
         name: "check_ins",
         self: `${this.apiRoot}/check_ins/${this.apiVersion}`,
         children: [],
-        path: ["check_ins", this.apiVersion],
+        childrenIds: [],
+        path: ["check_ins", this.apiVersion]
       }),
       new Node({
         name: "giving",
         self: `${this.apiRoot}/giving/${this.apiVersion}`,
         children: [],
-        path: ["giving", this.apiVersion],
+        childrenIds: [],
+        path: ["giving", this.apiVersion]
       }),
       new Node({
         name: "people",
         self: `${this.apiRoot}/people/${this.apiVersion}`,
         children: [],
-        path: ["people", this.apiVersion],
+        childrenIds: [],
+        path: ["people", this.apiVersion]
       }),
       new Node({
         name: "services",
         self: `${this.apiRoot}/services/${this.apiVersion}`,
         children: [],
-        path: ["services", this.apiVersion],
-      }),
+        childrenIds: [],
+        path: ["services", this.apiVersion]
+      })
     ]
 
     this.state = {
@@ -111,6 +115,7 @@ class Container extends React.Component {
       current: "",
       params: defaultParams,
       isFetching: false,
+      selectedId: null
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -155,7 +160,7 @@ class Container extends React.Component {
           overflow: "hidden",
           flexDirection: "column",
           margin: "16px 0",
-          minHeight: "calc(100vh - 32px)",
+          minHeight: "calc(100vh - 32px)"
         }}
       >
         <Header>PCO API Explorer</Header>
@@ -163,11 +168,12 @@ class Container extends React.Component {
           css={{
             background: "#f7f7f7",
             display: "flex",
-            flex: "1",
+            flex: "1"
           }}
         >
           <Div css={{ flexBasis: "200px" }}>
             <Tree
+              parent={tree}
               children={tree.children}
               onClick={this.handleLinkClick}
               current={this.baseUrl()}
@@ -180,7 +186,7 @@ class Container extends React.Component {
                 border: "1px solid #eeeeee",
                 borderRadius: "3px",
                 marginBottom: "32px",
-                padding: "15px",
+                padding: "15px"
               }}
             >
               <Headline css={{ display: "flex", margin: "0" }}>
@@ -192,7 +198,7 @@ class Container extends React.Component {
                     fontSize: "14px",
                     lineHeight: "16px",
                     margin: "-2px 0 -2px 8px",
-                    padding: "4px",
+                    padding: "4px"
                   }}
                   readOnly={true}
                   type="text"
@@ -208,7 +214,7 @@ class Container extends React.Component {
                   minWidth: "0",
                   overflow: "hidden",
                   textOverflow: "ellipses",
-                  whiteSpace: "nowrap",
+                  whiteSpace: "nowrap"
                 }}
               >
                 <Headline>URL Parameters</Headline>
@@ -250,9 +256,9 @@ class Container extends React.Component {
                 <Headline>Server Response</Headline>
                 <Pane theme="dark">
                   {this.state.isFetching
-                    ? <ReactLoading type="cylon" color="777" delay={0} />
+                    ? <ReactLoading type="cylon" color="#777" delay={0} />
                     : <ReactJsonView
-                        collapsed={false}
+                        collapsed={2}
                         displayDataTypes={false}
                         src={response}
                         theme="ocean"
@@ -284,7 +290,7 @@ class Container extends React.Component {
                 children: [],
                 id: Number(data.id),
                 name,
-                path,
+                path
               })
             )
           }
@@ -303,9 +309,10 @@ class Container extends React.Component {
               children: [],
               id: Number(d.id),
               name,
-              path,
+              path
             })
           )
+          parent.childrenIds = parent.children.map(c => c.id)
         }
       })
     }
@@ -384,7 +391,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included,
+      include: included
     })
 
     this.updateParams(params)
@@ -402,7 +409,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered,
+      filter: filtered
     })
 
     this.updateParams(params)
@@ -506,12 +513,13 @@ class Container extends React.Component {
   }
 }
 
-const Tree = ({ children, current, onClick, style }) => {
+const Tree = ({ parent, children, childrenIds, current, onClick, style }) => {
   const tree = children.map(l => {
-    let children
+    let childTree
     if (l.children.length > 0) {
-      children = (
+      childTree = (
         <Tree
+          parent={l}
           key={`${l.self}-children`}
           children={_.uniq(l.children, false, c => c.name)}
           onClick={onClick}
@@ -521,6 +529,7 @@ const Tree = ({ children, current, onClick, style }) => {
     }
 
     const { Div } = createStyledElement
+    const display = l.name == "<id>" ? "ID" : l.name
 
     return (
       <div key={l.self} style={{}}>
@@ -534,9 +543,9 @@ const Tree = ({ children, current, onClick, style }) => {
           selected={current === l.self}
           level={l.path.length - 1}
         >
-          {l.name}
+          {display}
         </NavLink>
-        {children}
+        {childTree}
       </div>
     )
   })
@@ -550,12 +559,13 @@ const Tree = ({ children, current, onClick, style }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o =>
+    const options = response.meta.can_order_by.map(o => (
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
+        {" "}
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -569,6 +579,7 @@ const Ordering = ({ response, onChange, params }) => {
               value="none"
               checked={params.order == undefined}
             />
+            {" "}
             None
           </OptionsLabel>
           {options}
@@ -582,9 +593,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o =>
+    const options = response.meta.can_query_by.map(o => (
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    )
+    ))
 
     return (
       <Pane>
@@ -599,12 +610,12 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o =>
+    const options = response.meta.can_include.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -621,12 +632,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o =>
+    const options = response.meta.can_filter.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -695,7 +706,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px",
+            padding: "4px"
           }}
           readOnly={true}
           type="text"
