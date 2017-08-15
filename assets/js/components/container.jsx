@@ -161,9 +161,21 @@ class Container extends React.Component {
         <Header>PCO API Explorer</Header>
         <Div
           css={{
-            background: "#ffffff",
-            display: "flex",
-            height: "100%",
+            borderLeft: "1px solid #eeeeee",
+            flexBasis: "200px",
+            padding: "32px 0 0"
+          }}
+        >
+          <Headline>API Tree</Headline>
+          <Tree
+            children={tree.children}
+            onClick={this.handleLinkClick}
+            current={this.baseUrl()}
+          />
+        </Div>
+        <Div
+          css={{
+            background: "#f7f7f7",
             flex: "1",
           }}
         >
@@ -171,7 +183,6 @@ class Container extends React.Component {
             <Tree
               children={tree.children}
               onClick={this.handleLinkClick}
-              key={tree.self}
               current={this.baseUrl()}
             />
           </Div>
@@ -261,6 +272,16 @@ class Container extends React.Component {
                       />}
                 </Pane>
               </Div>
+            </Div>
+            <Div css={{ flex: "1", minWidth: "0" }}>
+              <h3>Server Response</h3>
+              {this.state.isFetching
+                ? <ReactLoading type="cylon" color="#777" delay={0} />
+                : <ReactJsonView
+                    src={response}
+                    collapsed={1}
+                    displayDataTypes={false}
+                  />}
             </Div>
           </Div>
         </Div>
@@ -514,7 +535,7 @@ const Tree = ({ children, current, onClick, style }) => {
     if (l.children.length > 0) {
       children = (
         <Tree
-          key={`${l.path.toString()}-children`}
+          key={`${l.self}-children`}
           children={_.uniq(l.children, false, c => c.name)}
           onClick={onClick}
           current={current}
@@ -525,16 +546,14 @@ const Tree = ({ children, current, onClick, style }) => {
     const { Div } = createStyledElement
 
     return (
-      <div style={{}}>
+      <div key={l.self} style={{}}>
         <NavLink
-          link
-          url={l.self}
           onClick={e => {
             e.preventDefault()
             e.stopPropagation()
             onClick(l.self)
           }}
-          key={l.path.toString()}
+          key={l.self}
           selected={current === l.self}
           level={l.path.length - 1}
         >
