@@ -14,7 +14,11 @@ import Pane from "./ui/pane"
 const base64 = require("base-64")
 const defaultPerPage = 25
 const defaultOffset = 0
-const defaultParams = { per_page: defaultPerPage, offset: defaultOffset }
+const defaultParams = {
+  per_page: defaultPerPage,
+  offset: defaultOffset,
+  custom: ""
+}
 
 const log = true
 // const log = false
@@ -114,6 +118,7 @@ class Container extends React.Component {
     this.handleIncludingChange = this.handleIncludingChange.bind(this)
     this.handleFilteringChange = this.handleFilteringChange.bind(this)
     this.handleLimitingChange = this.handleLimitingChange.bind(this)
+    this.handleCustomChange = this.handleCustomChange.bind(this)
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
     this.updateParams = this.updateParams.bind(this)
     this.createChildren = this.createChildren.bind(this)
@@ -144,7 +149,7 @@ class Container extends React.Component {
             children={tree.children}
             onClick={this.handleLinkClick}
             key={tree.self}
-            current={this.computePath(current)}
+            current={this.baseUrl()}
           />
         </Div>
         <Div
@@ -213,6 +218,10 @@ class Container extends React.Component {
                     <Limiting
                       {...this.state}
                       onChange={e => this.handleLimitingChange(e)}
+                    />
+                    <Custom
+                      {...this.state}
+                      onChange={e => this.handleCustomChange(e)}
                     />
                   </span>}
             </Div>
@@ -386,6 +395,12 @@ class Container extends React.Component {
     this.updateParams(params)
   }
 
+  handleCustomChange(e) {
+    let params = this.state.params
+    params = Object.assign(params, { custom: e.target.value })
+    this.updateParams(params)
+  }
+
   findNodeBySelf(link) {
     return this.state.tree.children.find(n => n.self === link)
   }
@@ -433,9 +448,16 @@ class Container extends React.Component {
     if (params.offset == defaultOffset) {
       delete params.offset
     }
-    params = Object.keys(params).map(k => `${k}=${params[k]}`).join("&")
-    if (Object.keys(params).length > 0) {
-      return `${base}?${params}`
+    if (params.custom == "") {
+      delete params.custom
+    }
+    let newParams = Object.keys(params)
+      .filter(p => p !== "custom")
+      .map(k => `${k}=${params[k]}`)
+    params.custom && newParams.push(params.custom)
+    newParams = newParams.join("&")
+    if (newParams.length > 0) {
+      return `${base}?${newParams}`
     } else {
       return base
     }
@@ -485,7 +507,7 @@ const Tree = ({ children, current, onClick, style }) => {
             onClick(l.self)
           }}
           key={l.path.toString()}
-          selected={current.toString() === l.path.toString()}
+          selected={current === l.self}
           level={l.path.length - 1}
         >
           {l.name}
@@ -614,6 +636,22 @@ const Limiting = ({ response, onChange, params }) => {
         value={params.per_page}
       >
         Per page:
+      </LabelInput>
+    </Pane>
+  )
+}
+
+const Custom = ({ response, onChange, params }) => {
+  return (
+    <Pane>
+      <Headline>Custom Parameters</Headline>
+      <LabelInput
+        onChange={onChange}
+        name="custom"
+        type="text"
+        value={params.custom}
+      >
+        Custom:
       </LabelInput>
     </Pane>
   )
