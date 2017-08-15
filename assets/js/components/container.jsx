@@ -3,6 +3,7 @@ import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
 import createStyledElement from "create-styled-element"
 import _ from "underscore"
+import ReactLoading from "react-loading" // https://github.com/fakiolinho/react-loading
 import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
 import LabelInput from "./ui/label_input"
@@ -15,7 +16,12 @@ import Pane from "./ui/pane"
 const base64 = require("base-64")
 const defaultPerPage = 25
 const defaultOffset = 0
-const defaultParams = { per_page: defaultPerPage, offset: defaultOffset }
+const defaultParams = {
+  per_page: defaultPerPage,
+  offset: defaultOffset,
+  custom: "",
+}
+const debounceTime = 500
 
 const log = true
 // const log = false
@@ -36,7 +42,7 @@ const console = {
     if (log) {
       window.console.log(terms)
     }
-  }
+  },
 }
 
 class API {
@@ -45,8 +51,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -76,45 +82,55 @@ class Container extends React.Component {
         name: "check_ins",
         self: `${this.apiRoot}/check_ins/${this.apiVersion}`,
         children: [],
-        path: ["check_ins", this.apiVersion]
+        path: ["check_ins", this.apiVersion],
       }),
       new Node({
         name: "giving",
         self: `${this.apiRoot}/giving/${this.apiVersion}`,
         children: [],
-        path: ["giving", this.apiVersion]
+        path: ["giving", this.apiVersion],
       }),
       new Node({
         name: "people",
         self: `${this.apiRoot}/people/${this.apiVersion}`,
         children: [],
-        path: ["people", this.apiVersion]
+        path: ["people", this.apiVersion],
       }),
       new Node({
         name: "services",
         self: `${this.apiRoot}/services/${this.apiVersion}`,
         children: [],
-        path: ["services", this.apiVersion]
-      })
+        path: ["services", this.apiVersion],
+      }),
     ]
 
     this.state = {
       tree: { children: startingTree },
       baseUrl: `${this.apiRoot}`,
-      links: [],
       response: {},
       current: "",
-      params: defaultParams
+      params: defaultParams,
+      isFetching: false,
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
 
     this.handleLinkClick = this.handleLinkClick.bind(this)
     this.handleOrderingChange = this.handleOrderingChange.bind(this)
-    this.handleQueryingChange = this.handleQueryingChange.bind(this)
+    this.handleQueryingChange = _.debounce(
+      this.handleQueryingChange.bind(this),
+      debounceTime
+    )
     this.handleIncludingChange = this.handleIncludingChange.bind(this)
     this.handleFilteringChange = this.handleFilteringChange.bind(this)
-    this.handleLimitingChange = this.handleLimitingChange.bind(this)
+    this.handleLimitingChange = _.debounce(
+      this.handleLimitingChange.bind(this),
+      debounceTime
+    )
+    this.handleCustomChange = _.debounce(
+      this.handleCustomChange.bind(this),
+      debounceTime
+    )
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
     this.updateParams = this.updateParams.bind(this)
     this.createChildren = this.createChildren.bind(this)
@@ -156,26 +172,21 @@ class Container extends React.Component {
               children={tree.children}
               onClick={this.handleLinkClick}
               key={tree.self}
-              current={this.computePath(current)}
+              current={this.baseUrl()}
             />
           </Div>
-          <Div
-            css={{
-              background: "#f7f7f7",
-              flex: "1",
-              padding: "32px",
-            }}
-          >
+          <Div css={{ background: "#f7f7f7", flex: "1", padding: "32px" }}>
             <Div
               css={{
                 background: "#fafafa",
                 border: "1px solid #eeeeee",
                 borderRadius: "3px",
+                marginBottom: "32px",
                 padding: "15px",
               }}
             >
               <Headline css={{ display: "flex", margin: "0" }}>
-                <span>Current Link</span>
+                <span>Current URL</span>
                 <Input
                   css={{
                     color: "#979797",
@@ -195,20 +206,24 @@ class Container extends React.Component {
               <Div
                 css={{
                   flex: "1",
-                  margin: "16px 32px 0 0",
+                  margin: "0 32px 0 0",
                   minWidth: "0",
                   overflow: "hidden",
                   textOverflow: "ellipses",
                   whiteSpace: "nowrap",
                 }}
               >
+                <Headline>URL Parameters</Headline>
                 <Ordering
                   {...this.state}
                   onChange={this.handleOrderingChange}
                 />
                 <Querying
                   {...this.state}
-                  onChange={e => this.handleQueryingChange(e)}
+                  onChange={e => {
+                    e.persist()
+                    this.handleQueryingChange(e)
+                  }}
                 />
                 <Including
                   {...this.state}
@@ -220,16 +235,31 @@ class Container extends React.Component {
                 />
                 <Limiting
                   {...this.state}
-                  onChange={e => this.handleLimitingChange(e)}
+                  onChange={e => {
+                    e.persist()
+                    this.handleLimitingChange(e)
+                  }}
+                />
+                <Custom
+                  {...this.state}
+                  onChange={e => {
+                    e.persist()
+                    this.handleCustomChange(e)
+                  }}
                 />
               </Div>
               <Div css={{ flex: "1", minWidth: "0" }}>
-                <h3>Server Response</h3>
-                <ReactJsonView
-                  src={response}
-                  collapsed={1}
-                  displayDataTypes={false}
-                />
+                <Headline>Server Response</Headline>
+                <Pane theme="dark">
+                  {this.state.isFetching
+                    ? <ReactLoading type="cylon" color="777" delay={0} />
+                    : <ReactJsonView
+                        collapsed={false}
+                        displayDataTypes={false}
+                        src={response}
+                        theme="ocean"
+                      />}
+                </Pane>
               </Div>
             </Div>
           </Div>
@@ -256,7 +286,7 @@ class Container extends React.Component {
                 children: [],
                 id: Number(data.id),
                 name,
-                path
+                path,
               })
             )
           }
@@ -275,7 +305,7 @@ class Container extends React.Component {
               children: [],
               id: Number(d.id),
               name,
-              path
+              path,
             })
           )
         }
@@ -356,7 +386,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included
+      include: included,
     })
 
     this.updateParams(params)
@@ -374,7 +404,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered
+      filter: filtered,
     })
 
     this.updateParams(params)
@@ -393,18 +423,24 @@ class Container extends React.Component {
     this.updateParams(params)
   }
 
+  handleCustomChange(e) {
+    let params = this.state.params
+    params = Object.assign(params, { custom: e.target.value })
+    this.updateParams(params)
+  }
+
   findNodeBySelf(link) {
     return this.state.tree.children.find(n => n.self === link)
   }
 
   updateParams(params) {
-    this.setState({ params }, () => {
+    this.setState({ params, isFetching: true }, () => {
       const current = this.currentURLWithExtraParams()
       API.get(current, response => {
         console.groupCollapsed("updateParams")
         let tree = this.state.tree
         this.createChildren({ response })
-        this.setState({ current, response, tree })
+        this.setState({ current, response, tree, isFetching: false })
         console.groupEnd()
       })
     })
@@ -440,9 +476,16 @@ class Container extends React.Component {
     if (params.offset == defaultOffset) {
       delete params.offset
     }
-    params = Object.keys(params).map(k => `${k}=${params[k]}`).join("&")
-    if (Object.keys(params).length > 0) {
-      return `${base}?${params}`
+    if (params.custom == "") {
+      delete params.custom
+    }
+    let newParams = Object.keys(params)
+      .filter(p => p !== "custom")
+      .map(k => `${k}=${params[k]}`)
+    params.custom && newParams.push(params.custom)
+    newParams = newParams.join("&")
+    if (newParams.length > 0) {
+      return `${base}?${newParams}`
     } else {
       return base
     }
@@ -492,7 +535,7 @@ const Tree = ({ children, current, onClick, style }) => {
             onClick(l.self)
           }}
           key={l.path.toString()}
-          selected={current.toString() === l.path.toString()}
+          selected={current === l.self}
           level={l.path.length - 1}
         >
           {l.name}
@@ -511,12 +554,12 @@ const Tree = ({ children, current, onClick, style }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o => (
+    const options = response.meta.can_order_by.map(o =>
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -543,9 +586,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o => (
+    const options = response.meta.can_query_by.map(o =>
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    ))
+    )
 
     return (
       <Pane>
@@ -560,12 +603,12 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o => (
+    const options = response.meta.can_include.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -582,12 +625,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o => (
+    const options = response.meta.can_filter.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -610,7 +653,8 @@ const Limiting = ({ response, onChange, params }) => {
         onChange={onChange}
         name="offset"
         type="number"
-        value={params.offset}
+        defaultValue={params.offset}
+        placeholder={`default is ${defaultOffset}`}
       >
         Offset:
       </LabelInput>
@@ -618,9 +662,26 @@ const Limiting = ({ response, onChange, params }) => {
         onChange={onChange}
         name="per_page"
         type="number"
-        value={params.per_page}
+        defaultValue={params.per_page}
+        placeholder={`default is ${defaultPerPage}`}
       >
         Per page:
+      </LabelInput>
+    </Pane>
+  )
+}
+
+const Custom = ({ response, onChange, params }) => {
+  return (
+    <Pane>
+      <Headline>Custom Parameters</Headline>
+      <LabelInput
+        onChange={onChange}
+        name="custom"
+        type="text"
+        defaultValue={params.custom}
+      >
+        Custom:
       </LabelInput>
     </Pane>
   )
@@ -638,7 +699,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px"
+            padding: "4px",
           }}
           readOnly={true}
           type="text"
