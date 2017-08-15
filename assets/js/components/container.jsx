@@ -19,6 +19,7 @@ const defaultParams = {
   offset: defaultOffset,
   custom: ""
 }
+const debounceTime = 500
 
 const log = true
 // const log = false
@@ -114,11 +115,20 @@ class Container extends React.Component {
 
     this.handleLinkClick = this.handleLinkClick.bind(this)
     this.handleOrderingChange = this.handleOrderingChange.bind(this)
-    this.handleQueryingChange = this.handleQueryingChange.bind(this)
+    this.handleQueryingChange = _.debounce(
+      this.handleQueryingChange.bind(this),
+      debounceTime
+    )
     this.handleIncludingChange = this.handleIncludingChange.bind(this)
     this.handleFilteringChange = this.handleFilteringChange.bind(this)
-    this.handleLimitingChange = this.handleLimitingChange.bind(this)
-    this.handleCustomChange = this.handleCustomChange.bind(this)
+    this.handleLimitingChange = _.debounce(
+      this.handleLimitingChange.bind(this),
+      debounceTime
+    )
+    this.handleCustomChange = _.debounce(
+      this.handleCustomChange.bind(this),
+      debounceTime
+    )
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
     this.updateParams = this.updateParams.bind(this)
     this.createChildren = this.createChildren.bind(this)
@@ -199,7 +209,10 @@ class Container extends React.Component {
               <Ordering {...this.state} onChange={this.handleOrderingChange} />
               <Querying
                 {...this.state}
-                onChange={e => this.handleQueryingChange(e)}
+                onChange={e => {
+                  e.persist()
+                  this.handleQueryingChange(e)
+                }}
               />
               <Including
                 {...this.state}
@@ -211,11 +224,17 @@ class Container extends React.Component {
               />
               <Limiting
                 {...this.state}
-                onChange={e => this.handleLimitingChange(e)}
+                onChange={e => {
+                  e.persist()
+                  this.handleLimitingChange(e)
+                }}
               />
               <Custom
                 {...this.state}
-                onChange={e => this.handleCustomChange(e)}
+                onChange={e => {
+                  e.persist()
+                  this.handleCustomChange(e)
+                }}
               />
             </Div>
             <Div css={{ flex: "1", minWidth: "0" }}>
@@ -618,7 +637,8 @@ const Limiting = ({ response, onChange, params }) => {
         onChange={onChange}
         name="offset"
         type="number"
-        value={params.offset}
+        defaultValue={params.offset}
+        placeholder={`default is ${defaultOffset}`}
       >
         Offset:
       </LabelInput>
@@ -626,7 +646,8 @@ const Limiting = ({ response, onChange, params }) => {
         onChange={onChange}
         name="per_page"
         type="number"
-        value={params.per_page}
+        defaultValue={params.per_page}
+        placeholder={`default is ${defaultPerPage}`}
       >
         Per page:
       </LabelInput>
@@ -642,7 +663,7 @@ const Custom = ({ response, onChange, params }) => {
         onChange={onChange}
         name="custom"
         type="text"
-        value={params.custom}
+        defaultValue={params.custom}
       >
         Custom:
       </LabelInput>
