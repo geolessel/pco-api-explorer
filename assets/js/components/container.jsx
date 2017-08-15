@@ -196,34 +196,27 @@ class Container extends React.Component {
               }}
             >
               <h3>URL Parameters</h3>
-              {this.state.isFetching
-                ? <ReactLoading type="cylon" color="777" delay={0} />
-                : <span>
-                    <Ordering
-                      {...this.state}
-                      onChange={this.handleOrderingChange}
-                    />
-                    <Querying
-                      {...this.state}
-                      onChange={e => this.handleQueryingChange(e)}
-                    />
-                    <Including
-                      {...this.state}
-                      onChange={e => this.handleIncludingChange(e)}
-                    />
-                    <Filtering
-                      {...this.state}
-                      onChange={e => this.handleFilteringChange(e)}
-                    />
-                    <Limiting
-                      {...this.state}
-                      onChange={e => this.handleLimitingChange(e)}
-                    />
-                    <Custom
-                      {...this.state}
-                      onChange={e => this.handleCustomChange(e)}
-                    />
-                  </span>}
+              <Ordering {...this.state} onChange={this.handleOrderingChange} />
+              <Querying
+                {...this.state}
+                onChange={e => this.handleQueryingChange(e)}
+              />
+              <Including
+                {...this.state}
+                onChange={e => this.handleIncludingChange(e)}
+              />
+              <Filtering
+                {...this.state}
+                onChange={e => this.handleFilteringChange(e)}
+              />
+              <Limiting
+                {...this.state}
+                onChange={e => this.handleLimitingChange(e)}
+              />
+              <Custom
+                {...this.state}
+                onChange={e => this.handleCustomChange(e)}
+              />
             </Div>
             <Div css={{ flex: "1", minWidth: "0" }}>
               <h3>Server Response</h3>
