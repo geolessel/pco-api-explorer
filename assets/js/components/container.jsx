@@ -260,16 +260,6 @@ class Container extends React.Component {
                 </Pane>
               </Div>
             </Div>
-            <Div css={{ flex: "1", minWidth: "0" }}>
-              <h3>Server Response</h3>
-              {this.state.isFetching
-                ? <ReactLoading type="cylon" color="#777" delay={0} />
-                : <ReactJsonView
-                    src={response}
-                    collapsed={1}
-                    displayDataTypes={false}
-                  />}
-            </Div>
           </Div>
         </Div>
         <Footer>That's all folks.</Footer>
