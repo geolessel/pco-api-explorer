@@ -3,6 +3,7 @@ import { Flex, Grid, Cell } from "golly"
 import ReactJsonView from "react-json-view"
 import createStyledElement from "create-styled-element"
 import _ from "underscore"
+import ReactLoading from "react-loading" // https://github.com/fakiolinho/react-loading
 import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
 import LabelInput from "./ui/label_input"
@@ -99,10 +100,10 @@ class Container extends React.Component {
     this.state = {
       tree: { children: startingTree },
       baseUrl: `${this.apiRoot}`,
-      links: [],
       response: {},
       current: "",
-      params: defaultParams
+      params: defaultParams,
+      isFetching: false
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -162,7 +163,7 @@ class Container extends React.Component {
             }}
           >
             <Headline css={{ display: "flex", margin: "0" }}>
-              <span>Current Link</span>
+              <span>Current URL</span>
               <Input
                 css={{
                   color: "#979797",
@@ -182,38 +183,48 @@ class Container extends React.Component {
             <Div
               css={{
                 flex: "1",
-                margin: "16px 32px 0 0",
+                margin: "0 32px 0 0",
                 minWidth: "0",
                 overflow: "hidden",
                 textOverflow: "ellipses",
                 whiteSpace: "nowrap"
               }}
             >
-              <Ordering {...this.state} onChange={this.handleOrderingChange} />
-              <Querying
-                {...this.state}
-                onChange={e => this.handleQueryingChange(e)}
-              />
-              <Including
-                {...this.state}
-                onChange={e => this.handleIncludingChange(e)}
-              />
-              <Filtering
-                {...this.state}
-                onChange={e => this.handleFilteringChange(e)}
-              />
-              <Limiting
-                {...this.state}
-                onChange={e => this.handleLimitingChange(e)}
-              />
+              <h3>URL Parameters</h3>
+              {this.state.isFetching
+                ? <ReactLoading type="cylon" color="777" delay={0} />
+                : <span>
+                    <Ordering
+                      {...this.state}
+                      onChange={this.handleOrderingChange}
+                    />
+                    <Querying
+                      {...this.state}
+                      onChange={e => this.handleQueryingChange(e)}
+                    />
+                    <Including
+                      {...this.state}
+                      onChange={e => this.handleIncludingChange(e)}
+                    />
+                    <Filtering
+                      {...this.state}
+                      onChange={e => this.handleFilteringChange(e)}
+                    />
+                    <Limiting
+                      {...this.state}
+                      onChange={e => this.handleLimitingChange(e)}
+                    />
+                  </span>}
             </Div>
             <Div css={{ flex: "1", minWidth: "0" }}>
               <h3>Server Response</h3>
-              <ReactJsonView
-                src={response}
-                collapsed={1}
-                displayDataTypes={false}
-              />
+              {this.state.isFetching
+                ? <ReactLoading type="cylon" color="777" delay={0} />
+                : <ReactJsonView
+                    src={response}
+                    collapsed={1}
+                    displayDataTypes={false}
+                  />}
             </Div>
           </Div>
         </Div>
@@ -380,13 +391,13 @@ class Container extends React.Component {
   }
 
   updateParams(params) {
-    this.setState({ params }, () => {
+    this.setState({ params, isFetching: true }, () => {
       const current = this.currentURLWithExtraParams()
       API.get(current, response => {
         console.groupCollapsed("updateParams")
         let tree = this.state.tree
         this.createChildren({ response })
-        this.setState({ current, response, tree })
+        this.setState({ current, response, tree, isFetching: false })
         console.groupEnd()
       })
     })
