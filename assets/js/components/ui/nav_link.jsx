@@ -14,6 +14,7 @@ const Link = ({ level, selected, ...props }) => {
     },
   }
   const dynamic = {
+    background: "#ffffff",
     fontSize: "12px",
     lineHeight: "16px",
     padding: "8px 8px 7px",

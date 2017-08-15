@@ -161,21 +161,8 @@ class Container extends React.Component {
         <Header>PCO API Explorer</Header>
         <Div
           css={{
-            borderLeft: "1px solid #eeeeee",
-            flexBasis: "200px",
-            padding: "32px 0 0"
-          }}
-        >
-          <Headline>API Tree</Headline>
-          <Tree
-            children={tree.children}
-            onClick={this.handleLinkClick}
-            current={this.baseUrl()}
-          />
-        </Div>
-        <Div
-          css={{
             background: "#f7f7f7",
+            display: "flex",
             flex: "1",
           }}
         >
