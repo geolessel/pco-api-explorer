@@ -42,9 +42,9 @@ const console = {
     }
   },
 
-  log(terms) {
+  log(...terms) {
     if (log) {
-      window.console.log(terms)
+      window.console.log(...terms)
     }
   }
 }
@@ -65,12 +65,13 @@ class API {
 }
 
 class Node {
-  constructor({ name, self, children, path, childrenIds, id }) {
+  constructor({ name, self, children, path, childrenIds, id, type }) {
     this.name = name
     this.self = self
     this.children = children
     this.path = path
     this.id = id
+    this.type = type
     this.childrenIds = childrenIds
   }
 }
@@ -116,7 +117,7 @@ class Container extends React.Component {
       tree: { children: startingTree },
       baseUrl: `${this.apiRoot}`,
       response: {},
-      current: "",
+      currentURL: "",
       params: defaultParams,
       isFetching: false,
       selectedId: null
@@ -140,6 +141,7 @@ class Container extends React.Component {
       this.handleCustomChange.bind(this),
       debounceTime
     )
+    this.handleIDChange = this.handleIDChange.bind(this)
     this.currentURLWithExtraParams = this.currentURLWithExtraParams.bind(this)
     this.updateParams = this.updateParams.bind(this)
     this.createChildren = this.createChildren.bind(this)
@@ -180,7 +182,7 @@ class Container extends React.Component {
               parent={tree}
               children={tree.children}
               onClick={this.handleLinkClick}
-              current={this.baseUrl()}
+              currentURL={this.baseUrl()}
             />
           </Div>
           <Div
@@ -188,7 +190,7 @@ class Container extends React.Component {
               background: "#f7f7f7",
               flex: "1",
               minWidth: "0",
-              padding: "32px",
+              padding: "32px"
             }}
           >
             <Pane
@@ -198,7 +200,7 @@ class Container extends React.Component {
                 display: "flex",
                 lineHeight: "24px",
                 marginBottom: "32px",
-                minHeight: "24px",
+                minHeight: "24px"
               }}
             >
               <Div css={{ flex: "0 0 auto", fontWeight: "700" }}>
@@ -221,9 +223,27 @@ class Container extends React.Component {
               css={{
                 display: "flex",
                 flex: "1",
-                "@media(max-width: 999px)": { flexDirection: "column" },
+                "@media(max-width: 999px)": { flexDirection: "column" }
               }}
             >
+              <Headline css={{ display: "flex", margin: "0" }}>
+                <span>Current URL</span>
+                <Input
+                  css={{
+                    color: "#979797",
+                    flex: "1",
+                    fontSize: "14px",
+                    lineHeight: "16px",
+                    margin: "-2px 0 -2px 8px",
+                    padding: "4px"
+                  }}
+                  readOnly={true}
+                  type="text"
+                  value={currentURL}
+                />
+              </Headline>
+            </Div>
+            <Div css={{ display: "flex", flex: "1" }}>
               <Div
                 css={{
                   flex: "1",
@@ -232,10 +252,21 @@ class Container extends React.Component {
                   overflow: "hidden",
                   textOverflow: "ellipses",
                   whiteSpace: "nowrap",
-                  "@media(max-width: 999px)": { margin: "0 0 32px" },
+                  "@media(max-width: 999px)": { margin: "0 0 32px" }
                 }}
               >
                 <Headline>URL Parameters</Headline>
+                <ID
+                  parent={this.recursivelyFindByPath(
+                    this.computePath(currentURL).slice(0, -1),
+                    tree
+                  )}
+                  currentNode={this.recursivelyFindByPath(
+                    this.computePath(currentURL),
+                    tree
+                  )}
+                  onChange={e => this.handleIDChange(e)}
+                />
                 <Ordering
                   {...this.state}
                   onChange={this.handleOrderingChange}
@@ -305,6 +336,7 @@ class Container extends React.Component {
             parent.children.push(
               new Node({
                 self: data.links[k],
+                type: k,
                 children: [],
                 id: Number(data.id),
                 name,
@@ -324,6 +356,7 @@ class Container extends React.Component {
           parent.children.push(
             new Node({
               self: d.links.self,
+              type: d.type,
               children: [],
               id: Number(d.id),
               name,
@@ -336,35 +369,10 @@ class Container extends React.Component {
     }
   }
 
-  findParentNode(url) {
-    const { tree } = this.state
-    const pathOfParent = this.computePath(url)
-    console.log("looking for ", pathOfParent.toString())
-    let parent
-    tree.children.some(c => {
-      console.log("checking", c.path.toString())
-      if (c.children.length > 0) {
-        c.children.some(g => {
-          console.log("checking child", g.path.toString())
-          if (g.path.toString() == pathOfParent.toString()) {
-            parent = g
-            return true
-          }
-        })
-      }
-      if (c.path.toString() == pathOfParent.toString()) {
-        parent = c
-        return true
-      }
-    })
-    console.log("parent of ", url, " is ", parent)
-    return parent
-  }
-
   handleLinkClick(current) {
     console.groupCollapsed("handleLinkClick")
     console.log("click", current)
-    this.setState({ current, params: defaultParams }, () => {
+    this.setState({ currentURL: current.self, params: defaultParams }, () => {
       this.updateParams({})
     })
     console.groupEnd()
@@ -452,18 +460,23 @@ class Container extends React.Component {
     this.updateParams(params)
   }
 
+  handleIDChange(e) {
+    this.setState({ selectedId: e.target.value })
+    this.updateParams(this.state.params)
+  }
+
   findNodeBySelf(link) {
     return this.state.tree.children.find(n => n.self === link)
   }
 
   updateParams(params) {
     this.setState({ params, isFetching: true }, () => {
-      const current = this.currentURLWithExtraParams()
-      API.get(current, response => {
+      const currentURL = this.currentURLWithExtraParams()
+      API.get(currentURL, response => {
         console.groupCollapsed("updateParams")
         let tree = this.state.tree
         this.createChildren({ response })
-        this.setState({ current, response, tree, isFetching: false })
+        this.setState({ currentURL, response, tree, isFetching: false })
         console.groupEnd()
       })
     })
@@ -515,7 +528,7 @@ class Container extends React.Component {
   }
 
   baseUrl() {
-    return this.state.current.split("?")[0]
+    return this.state.currentURL.split("?")[0]
   }
 
   computePath(link) {
@@ -531,7 +544,14 @@ class Container extends React.Component {
   }
 }
 
-const Tree = ({ parent, children, childrenIds, current, onClick, style }) => {
+const Tree = ({
+  parent,
+  children,
+  childrenIds,
+  currentURL,
+  onClick,
+  style
+}) => {
   const tree = children.map(l => {
     let childTree
     if (l.children.length > 0) {
@@ -541,7 +561,7 @@ const Tree = ({ parent, children, childrenIds, current, onClick, style }) => {
           key={`${l.self}-children`}
           children={_.uniq(l.children, false, c => c.name)}
           onClick={onClick}
-          current={current}
+          currentURL={currentURL}
         />
       )
     }
@@ -555,10 +575,10 @@ const Tree = ({ parent, children, childrenIds, current, onClick, style }) => {
           onClick={e => {
             e.preventDefault()
             e.stopPropagation()
-            onClick(l.self)
+            onClick(l)
           }}
           key={l.self}
-          selected={current === l.self}
+          selected={currentURL === l.self}
           level={l.path.length - 1}
         >
           {display}
@@ -573,6 +593,25 @@ const Tree = ({ parent, children, childrenIds, current, onClick, style }) => {
       {tree}
     </div>
   )
+}
+
+const ID = ({ onChange, parent, currentNode }) => {
+  if (parent && parent.childrenIds && parent.childrenIds.length > 0) {
+    const options = parent.childrenIds.map(id => (
+      <option key={id} value={id}>{id}</option>
+    ))
+
+    return (
+      <Pane>
+        <Headline>{currentNode.type} ID</Headline>
+        <select name={`${parent.name}_id`} onChange={onChange}>
+          {options}
+        </select>
+      </Pane>
+    )
+  } else {
+    return null
+  }
 }
 
 const Ordering = ({ response, onChange, params }) => {
