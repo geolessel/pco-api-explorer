@@ -7,6 +7,8 @@ import ReactLoading from "react-loading" // https://github.com/fakiolinho/react-
 import ListItem from "./ui/list_item"
 import NavLink from "./ui/nav_link"
 import LabelInput from "./ui/label_input"
+import Header from "./ui/header.jsx"
+import Footer from "./ui/footer.jsx"
 import Headline from "./ui/headline"
 import OptionsLabel from "./ui/options_label"
 import Pane from "./ui/pane"
@@ -17,7 +19,7 @@ const defaultOffset = 0
 const defaultParams = {
   per_page: defaultPerPage,
   offset: defaultOffset,
-  custom: ""
+  custom: "",
 }
 const debounceTime = 500
 
@@ -40,7 +42,7 @@ const console = {
     if (log) {
       window.console.log(terms)
     }
-  }
+  },
 }
 
 class API {
@@ -49,8 +51,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -80,26 +82,26 @@ class Container extends React.Component {
         name: "check_ins",
         self: `${this.apiRoot}/check_ins/${this.apiVersion}`,
         children: [],
-        path: ["check_ins", this.apiVersion]
+        path: ["check_ins", this.apiVersion],
       }),
       new Node({
         name: "giving",
         self: `${this.apiRoot}/giving/${this.apiVersion}`,
         children: [],
-        path: ["giving", this.apiVersion]
+        path: ["giving", this.apiVersion],
       }),
       new Node({
         name: "people",
         self: `${this.apiRoot}/people/${this.apiVersion}`,
         children: [],
-        path: ["people", this.apiVersion]
+        path: ["people", this.apiVersion],
       }),
       new Node({
         name: "services",
         self: `${this.apiRoot}/services/${this.apiVersion}`,
         children: [],
-        path: ["services", this.apiVersion]
-      })
+        path: ["services", this.apiVersion],
+      }),
     ]
 
     this.state = {
@@ -108,7 +110,7 @@ class Container extends React.Component {
       response: {},
       current: "",
       params: defaultParams,
-      isFetching: false
+      isFetching: false,
     }
 
     API.key = base64.encode(`${this.props.applicationId}:${this.props.secret}`)
@@ -146,95 +148,117 @@ class Container extends React.Component {
     const { Div, Input } = createStyledElement
 
     return (
-      <Div css={{ display: "flex" }}>
-        <Div
-          css={{
-            borderLeft: "1px solid #eeeeee",
-            flexBasis: "200px",
-            padding: "32px 0 0"
-          }}
-        >
-          <Headline>API Tree</Headline>
-          <Tree
-            children={tree.children}
-            onClick={this.handleLinkClick}
-            current={this.baseUrl()}
-          />
-        </Div>
+      <Div
+        css={{
+          borderRadius: "4px",
+          display: "flex",
+          overflow: "hidden",
+          flexDirection: "column",
+          margin: "16px 0",
+          minHeight: "calc(100vh - 32px)",
+        }}
+      >
+        <Header>PCO API Explorer</Header>
         <Div
           css={{
             background: "#f7f7f7",
+            display: "flex",
             flex: "1",
-            padding: "32px"
           }}
         >
-          <Div
-            css={{
-              background: "#fafafa",
-              border: "1px solid #eeeeee",
-              borderRadius: "3px",
-              padding: "15px"
-            }}
-          >
-            <Headline css={{ display: "flex", margin: "0" }}>
-              <span>Current URL</span>
-              <Input
-                css={{
-                  color: "#979797",
-                  flex: "1",
-                  fontSize: "14px",
-                  lineHeight: "16px",
-                  margin: "-2px 0 -2px 8px",
-                  padding: "4px"
-                }}
-                readOnly={true}
-                type="text"
-                value={current}
-              />
-            </Headline>
+          <Div css={{ flexBasis: "200px" }}>
+            <Tree
+              children={tree.children}
+              onClick={this.handleLinkClick}
+              current={this.baseUrl()}
+            />
           </Div>
-          <Div css={{ display: "flex", flex: "1" }}>
+          <Div css={{ background: "#f7f7f7", flex: "1", padding: "32px" }}>
             <Div
               css={{
-                flex: "1",
-                margin: "0 32px 0 0",
-                minWidth: "0",
-                overflow: "hidden",
-                textOverflow: "ellipses",
-                whiteSpace: "nowrap"
+                background: "#fafafa",
+                border: "1px solid #eeeeee",
+                borderRadius: "3px",
+                marginBottom: "32px",
+                padding: "15px",
               }}
             >
-              <h3>URL Parameters</h3>
-              <Ordering {...this.state} onChange={this.handleOrderingChange} />
-              <Querying
-                {...this.state}
-                onChange={e => {
-                  e.persist()
-                  this.handleQueryingChange(e)
+              <Headline css={{ display: "flex", margin: "0" }}>
+                <span>Current URL</span>
+                <Input
+                  css={{
+                    color: "#979797",
+                    flex: "1",
+                    fontSize: "14px",
+                    lineHeight: "16px",
+                    margin: "-2px 0 -2px 8px",
+                    padding: "4px",
+                  }}
+                  readOnly={true}
+                  type="text"
+                  value={current}
+                />
+              </Headline>
+            </Div>
+            <Div css={{ display: "flex", flex: "1" }}>
+              <Div
+                css={{
+                  flex: "1",
+                  margin: "0 32px 0 0",
+                  minWidth: "0",
+                  overflow: "hidden",
+                  textOverflow: "ellipses",
+                  whiteSpace: "nowrap",
                 }}
-              />
-              <Including
-                {...this.state}
-                onChange={e => this.handleIncludingChange(e)}
-              />
-              <Filtering
-                {...this.state}
-                onChange={e => this.handleFilteringChange(e)}
-              />
-              <Limiting
-                {...this.state}
-                onChange={e => {
-                  e.persist()
-                  this.handleLimitingChange(e)
-                }}
-              />
-              <Custom
-                {...this.state}
-                onChange={e => {
-                  e.persist()
-                  this.handleCustomChange(e)
-                }}
-              />
+              >
+                <Headline>URL Parameters</Headline>
+                <Ordering
+                  {...this.state}
+                  onChange={this.handleOrderingChange}
+                />
+                <Querying
+                  {...this.state}
+                  onChange={e => {
+                    e.persist()
+                    this.handleQueryingChange(e)
+                  }}
+                />
+                <Including
+                  {...this.state}
+                  onChange={e => this.handleIncludingChange(e)}
+                />
+                <Filtering
+                  {...this.state}
+                  onChange={e => this.handleFilteringChange(e)}
+                />
+                <Limiting
+                  {...this.state}
+                  onChange={e => {
+                    e.persist()
+                    this.handleLimitingChange(e)
+                  }}
+                />
+                <Custom
+                  {...this.state}
+                  onChange={e => {
+                    e.persist()
+                    this.handleCustomChange(e)
+                  }}
+                />
+              </Div>
+              <Div css={{ flex: "1", minWidth: "0" }}>
+                <Headline>Server Response</Headline>
+                <Pane theme="dark">
+                  {this.state.isFetching
+                    ? <ReactLoading type="cylon" color="777" delay={0} />
+                    : <ReactJsonView
+                        collapsed={false}
+                        displayDataTypes={false}
+                        src={response}
+                        theme="ocean"
+                      />}
+                </Pane>
+              </Div>
             </Div>
             <Div css={{ flex: "1", minWidth: "0" }}>
               <h3>Server Response</h3>
@@ -248,6 +272,7 @@ class Container extends React.Component {
             </Div>
           </Div>
         </Div>
+        <Footer>That's all folks.</Footer>
       </Div>
     )
   }
@@ -269,7 +294,7 @@ class Container extends React.Component {
                 children: [],
                 id: Number(data.id),
                 name,
-                path
+                path,
               })
             )
           }
@@ -288,7 +313,7 @@ class Container extends React.Component {
               children: [],
               id: Number(d.id),
               name,
-              path
+              path,
             })
           )
         }
@@ -369,7 +394,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included
+      include: included,
     })
 
     this.updateParams(params)
@@ -387,7 +412,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered
+      filter: filtered,
     })
 
     this.updateParams(params)
@@ -535,12 +560,12 @@ const Tree = ({ children, current, onClick, style }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o => (
+    const options = response.meta.can_order_by.map(o =>
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -567,9 +592,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o => (
+    const options = response.meta.can_query_by.map(o =>
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    ))
+    )
 
     return (
       <Pane>
@@ -584,12 +609,12 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o => (
+    const options = response.meta.can_include.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -606,12 +631,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o => (
+    const options = response.meta.can_filter.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -680,7 +705,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px"
+            padding: "4px",
           }}
           readOnly={true}
           type="text"
