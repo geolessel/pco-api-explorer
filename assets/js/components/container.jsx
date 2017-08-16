@@ -156,7 +156,7 @@ class Container extends React.Component {
   }
 
   render() {
-    const { current, response, tree } = this.state
+    const { currentURL, response, tree } = this.state
     const { Div, Input, Span } = createStyledElement
 
     return (
@@ -207,12 +207,12 @@ class Container extends React.Component {
               <Div css={{ flex: "0 0 auto", fontWeight: "700" }}>
                 Current URL:
               </Div>
-              {current
-                ? <TextWrapper>{current}</TextWrapper>
+              {currentURL
+                ? <TextWrapper>{currentURL}</TextWrapper>
                 : <TextWrapper transparent>none selected</TextWrapper>}
-              {current &&
+              {currentURL &&
                 <CopyToClipboard
-                  text={current}
+                  text={currentURL}
                   onCopy={() => this.setState({ copied: true })}
                 >
                   <Div css={{ flex: "0 0 auto" }}>
@@ -220,30 +220,6 @@ class Container extends React.Component {
                   </Div>
                 </CopyToClipboard>}
             </Pane>
-            <Div
-              css={{
-                display: "flex",
-                flex: "1",
-                "@media(max-width: 999px)": { flexDirection: "column" }
-              }}
-            >
-              <Headline css={{ display: "flex", margin: "0" }}>
-                <span>Current URL</span>
-                <Input
-                  css={{
-                    color: "#979797",
-                    flex: "1",
-                    fontSize: "14px",
-                    lineHeight: "16px",
-                    margin: "-2px 0 -2px 8px",
-                    padding: "4px"
-                  }}
-                  readOnly={true}
-                  type="text"
-                  value={currentURL}
-                />
-              </Headline>
-            </Div>
             <Div css={{ display: "flex", flex: "1" }}>
               <Div
                 css={{
