@@ -23,7 +23,7 @@ const defaultOffset = 0
 const defaultParams = {
   per_page: defaultPerPage,
   offset: defaultOffset,
-  custom: "",
+  custom: ""
 }
 const debounceTime = 500
 
@@ -46,7 +46,7 @@ const console = {
     if (log) {
       window.console.log(...terms)
     }
-  },
+  }
 }
 
 const setAPIKey = (id, secret) => {
@@ -59,8 +59,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`,
-      }),
+        Authorization: `Basic ${API.key}`
+      })
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -84,46 +84,48 @@ class Container extends React.Component {
   constructor(props) {
     super(props)
 
-    this.apiRoot = `https://api.planningcenteronline.com`
-    this.apiVersion = "v2"
+    const apiId = window.localStorage.apiId
+    const apiSecret = window.localStorage.apiSecret
+    const apiRoot =
+      window.sessionStorage.apiRoot || `https://api.planningcenteronline.com`
+    const apiVersion = "v2"
+
+    setAPIKey(apiId, apiSecret)
+
     const startingTree = [
       new Node({
         name: "check_ins",
-        self: `${this.apiRoot}/check_ins/${this.apiVersion}`,
+        self: `${apiRoot}/check_ins/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["check_ins", this.apiVersion],
+        path: ["check_ins", apiVersion]
       }),
       new Node({
         name: "giving",
-        self: `${this.apiRoot}/giving/${this.apiVersion}`,
+        self: `${apiRoot}/giving/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["giving", this.apiVersion],
+        path: ["giving", apiVersion]
       }),
       new Node({
         name: "people",
-        self: `${this.apiRoot}/people/${this.apiVersion}`,
+        self: `${apiRoot}/people/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["people", this.apiVersion],
+        path: ["people", apiVersion]
       }),
       new Node({
         name: "services",
-        self: `${this.apiRoot}/services/${this.apiVersion}`,
+        self: `${apiRoot}/services/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["services", this.apiVersion],
-      }),
+        path: ["services", apiVersion]
+      })
     ]
-
-    const apiId = window.localStorage.apiId
-    const apiSecret = window.localStorage.apiSecret
-    setAPIKey(apiId, apiSecret)
 
     this.state = {
       tree: { children: startingTree },
-      baseUrl: `${this.apiRoot}`,
+      baseUrl: apiRoot,
       response: {},
       currentNode: null,
       currentURL: "",
@@ -132,7 +134,7 @@ class Container extends React.Component {
       selectedId: null,
       apiId: apiId,
       apiSecret: apiSecret,
-      credentialsStored: !!apiId && !!apiSecret,
+      credentialsStored: !!apiId && !!apiSecret
     }
 
     this.handleLinkClick = this.handleLinkClick.bind(this)
@@ -168,7 +170,7 @@ class Container extends React.Component {
       tree,
       credentialsStored,
       apiId,
-      apiSecret,
+      apiSecret
     } = this.state
     const { Div, Input, Span } = createStyledElement
 
@@ -180,7 +182,7 @@ class Container extends React.Component {
           overflow: "hidden",
           flexDirection: "column",
           margin: "16px",
-          minHeight: "calc(100vh - 32px)",
+          minHeight: "calc(100vh - 32px)"
         }}
       >
         <Header>Planning Center API Explorer</Header>
@@ -189,7 +191,7 @@ class Container extends React.Component {
               css={{
                 background: "#fafafa",
                 display: "flex",
-                flex: "1",
+                flex: "1"
               }}
             >
               <Div css={{ flexBasis: "200px" }}>
@@ -205,7 +207,7 @@ class Container extends React.Component {
                   background: "#f7f7f7",
                   flex: "1",
                   minWidth: "0",
-                  padding: "32px",
+                  padding: "32px"
                 }}
               >
                 <Pane
@@ -215,7 +217,7 @@ class Container extends React.Component {
                     display: "flex",
                     lineHeight: "24px",
                     marginBottom: "32px",
-                    minHeight: "24px",
+                    minHeight: "24px"
                   }}
                 >
                   <Div css={{ flex: "0 0 auto", fontWeight: "700" }}>
@@ -239,8 +241,8 @@ class Container extends React.Component {
                     display: "flex",
                     flex: "1",
                     "@media(max-width: 1000px)": {
-                      flexDirection: "column",
-                    },
+                      flexDirection: "column"
+                    }
                   }}
                 >
                   <Div
@@ -251,7 +253,7 @@ class Container extends React.Component {
                       overflow: "hidden",
                       textOverflow: "ellipses",
                       whiteSpace: "nowrap",
-                      "@media(max-width: 1000px)": { margin: "0 0 32px" },
+                      "@media(max-width: 1000px)": { margin: "0 0 32px" }
                     }}
                   >
                     <Headline>URL Parameters</Headline>
@@ -331,7 +333,7 @@ class Container extends React.Component {
           flex: "1",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "center"
         }}
       >
         <Pane
@@ -341,7 +343,7 @@ class Container extends React.Component {
             margin: "0 auto",
             padding: "24px",
             width: "400px",
-            "@media(max-width:600px)": { width: "calc(100% - 64px)" },
+            "@media(max-width:600px)": { width: "calc(100% - 64px)" }
           }}
         >
           <Div css={{ marginBottom: "32px", textAlign: "center" }}>
@@ -380,7 +382,7 @@ class Container extends React.Component {
                 {
                   apiId: id,
                   apiSecret: secret,
-                  credentialsStored: !!id && !!secret,
+                  credentialsStored: !!id && !!secret
                 },
                 () => {
                   localStorage.apiId = id
@@ -415,7 +417,7 @@ class Container extends React.Component {
                 children: [],
                 id: Number(data.id),
                 name,
-                path,
+                path
               })
             )
           }
@@ -435,7 +437,7 @@ class Container extends React.Component {
               children: [],
               id: Number(d.id),
               name,
-              path,
+              path
             })
           )
           parent.childrenIds = parent.children.map(c => c.id)
@@ -458,7 +460,7 @@ class Container extends React.Component {
         currentNode,
         selectedId,
         currentURL: currentNode.self,
-        params: defaultParams,
+        params: defaultParams
       },
       () => {
         this.updateParams({})
@@ -506,7 +508,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included,
+      include: included
     })
 
     this.updateParams(params)
@@ -524,7 +526,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered,
+      filter: filtered
     })
 
     this.updateParams(params)
@@ -649,7 +651,7 @@ const Tree = ({
   childrenIds,
   currentURL,
   onClick,
-  style,
+  style
 }) => {
   const tree = children.map(l => {
     let childTree
@@ -696,9 +698,9 @@ const Tree = ({
 
 const ID = ({ onChange, parent, currentNode }) => {
   if (parent && parent.childrenIds && parent.childrenIds.length > 0) {
-    const options = parent.children.map(c =>
+    const options = parent.children.map(c => (
       <option key={c.id} value={c.id}>{c.id}</option>
-    )
+    ))
 
     return (
       <Pane>
@@ -715,13 +717,13 @@ const ID = ({ onChange, parent, currentNode }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o =>
+    const options = response.meta.can_order_by.map(o => (
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {" "}
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -749,9 +751,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o =>
+    const options = response.meta.can_query_by.map(o => (
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    )
+    ))
 
     return (
       <Pane>
@@ -766,13 +768,13 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o =>
+    const options = response.meta.can_include.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {" "}
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -789,12 +791,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o =>
+    const options = response.meta.can_filter.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -863,7 +865,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px",
+            padding: "4px"
           }}
           readOnly={true}
           type="text"
