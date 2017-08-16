@@ -160,10 +160,6 @@ class Container extends React.Component {
     this.computePath = this.computePath.bind(this)
   }
 
-  shouldComponentUpdate() {
-    return true
-  }
-
   render() {
     const {
       currentURL,
@@ -278,13 +274,14 @@ class Container extends React.Component {
                       {...this.state}
                       onChange={e => this.handleFilteringChange(e)}
                     />
-                    <Limiting
-                      {...this.state}
-                      onChange={e => {
-                        e.persist()
-                        this.handleLimitingChange(e)
-                      }}
-                    />
+                    {!this.isResource(currentNode) &&
+                      <Limiting
+                        {...this.state}
+                        onChange={e => {
+                          e.persist()
+                          this.handleLimitingChange(e)
+                        }}
+                      />}
                     <Custom
                       {...this.state}
                       onChange={e => {
