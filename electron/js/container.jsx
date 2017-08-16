@@ -730,6 +730,7 @@ const Including = ({ response, onChange, params }) => {
     const options = response.meta.can_include.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
+        {" "}
         {o}
       </OptionsLabel>
     ))
