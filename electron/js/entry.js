@@ -2,6 +2,6 @@
 
 import React from "react"
 import ReactDOM from "react-dom"
-import Container from "./container.jsx"
+import Container from "../../components/container.jsx"
 
 ReactDOM.render(<Container />, document.getElementById("content"))
