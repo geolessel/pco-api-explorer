@@ -21,7 +21,7 @@ import "react-phoenix"
 
 // import socket from "./socket"
 
-import Container from "./components/container"
+import Container from "../../../components/container.jsx"
 
 window.Components = {
   Container

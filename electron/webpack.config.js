@@ -1,4 +1,6 @@
-var webpack = require("webpack")
+const path = require("path")
+const webpack = require("webpack")
+
 module.exports = {
   entry: {
     app: ["webpack/hot/dev-server", "./js/entry.js"]
@@ -17,7 +19,7 @@ module.exports = {
       {
         test: /\.jsx?$/,
         loader: "babel-loader",
-        exclude: /node_modules/,
+        exclude: /.*node_modules\/((?!my-symlinked-module).)*$/,
         query: {
           presets: ["react", "es2015"],
           plugins: ["transform-object-rest-spread"]
