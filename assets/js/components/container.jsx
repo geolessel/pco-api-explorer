@@ -117,6 +117,7 @@ class Container extends React.Component {
       tree: { children: startingTree },
       baseUrl: `${this.apiRoot}`,
       response: {},
+      currentNode: null,
       currentURL: "",
       params: defaultParams,
       isFetching: false,
@@ -329,7 +330,7 @@ class Container extends React.Component {
       Object.keys(data.links).map(k => {
         if (k !== "self") {
           const path = this.computePath(data.links[k])
-          const name = path.slice(-1).toString() == ":id" ? "<id>" : k
+          const name = isNaN(Number(path.slice(-1))) ? k : "ID"
           const parent = this.recursivelyFindByPath(path.slice(0, -1), tree)
 
           if (parent) {
@@ -349,7 +350,7 @@ class Container extends React.Component {
     } else if (Array.isArray(data)) {
       data.forEach(d => {
         const path = this.computePath(d.links.self)
-        const name = path.slice(-1).toString() == ":id" ? "<id>" : d.type
+        const name = isNaN(Number(path.slice(-1))) ? k : "ID"
         const parent = this.recursivelyFindByPath(path.slice(0, -1), tree)
 
         if (parent) {
@@ -369,12 +370,26 @@ class Container extends React.Component {
     }
   }
 
-  handleLinkClick(current) {
+  handleLinkClick(currentNode) {
     console.groupCollapsed("handleLinkClick")
-    console.log("click", current)
-    this.setState({ currentURL: current.self, params: defaultParams }, () => {
-      this.updateParams({})
-    })
+    console.log("click", currentNode)
+    let selectedId
+    if (this.isResource(currentNode)) {
+      selectedId = currentNode.path.slice(-1)[0]
+    } else {
+      selectedId = null
+    }
+    this.setState(
+      {
+        currentNode,
+        selectedId,
+        currentURL: currentNode.self,
+        params: defaultParams
+      },
+      () => {
+        this.updateParams({})
+      }
+    )
     console.groupEnd()
   }
 
@@ -528,17 +543,27 @@ class Container extends React.Component {
   }
 
   baseUrl() {
-    return this.state.currentURL.split("?")[0]
+    const { currentNode, selectedId } = this.state
+    if (this.isResource(currentNode)) {
+      return currentNode.self.replace(/\/\d+$/, `/${selectedId}`)
+    } else {
+      return currentNode && currentNode.self
+    }
+  }
+
+  isResource(node) {
+    if (node === null) {
+      return false
+    } else {
+      return node.path && node.path.slice(-1)[0].match(/^\d+$/)
+    }
   }
 
   computePath(link) {
     if (link === null) {
       return []
     }
-    let path = link
-      .replace(this.state.baseUrl, "")
-      .replace(/\/\d+(\/)*/g, "/:id$1")
-      .split("/")
+    let path = link.replace(this.state.baseUrl, "").split("/")
     path.shift()
     return path
   }
@@ -597,8 +622,8 @@ const Tree = ({
 
 const ID = ({ onChange, parent, currentNode }) => {
   if (parent && parent.childrenIds && parent.childrenIds.length > 0) {
-    const options = parent.childrenIds.map(id => (
-      <option key={id} value={id}>{id}</option>
+    const options = parent.children.map(c => (
+      <option key={c.id} value={c.id}>{c.id}</option>
     ))
 
     return (
