@@ -1,23 +1,23 @@
-# ApiExplorer
+# Planning Center API Explorer
 
-Setup:
-  * Create a Personal Access Token (http://api.pco.dev/oauth/applications)
-  * Add `API_EXPLORER_APP_ID=<id>` and `API_EXPLORER_SECRET=<secret>` to your terminal
+## Getting started
 
-To start your Phoenix server:
+1. Create a Personal Access Token for this app: [https://api.planningcenteronline.com/oauth/applications](https://api.planningcenteronline.com/oauth/applications)
+2. Run this for development (hot reloading):
+```bash
+cd electron
+npm install
+npm run-script watch
+```
+3. To launch the app: `npm start`
 
-  * Install dependencies with `mix deps.get`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
+## Troubleshooting
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+* If you've already put in your API id and secret but would like to reset it, open the developer tools
+(cmd-opt-i) and in the js console:
+```
+localStorage.apiId = ''
+localStorage.apiSecret = ''
+```
 
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
-
-## Learn more
-
-  * Official website: http://www.phoenixframework.org/
-  * Guides: http://phoenixframework.org/docs/overview
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+* Press cmd-r to reload the page
