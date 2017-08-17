@@ -4,7 +4,7 @@ import createStyledElement from "create-styled-element"
 const Footer = props => {
   const styles = {
     background: "#fafafa",
-    borderTop: "1px solid #eee",
+    borderTop: "1px solid #d7d7d7",
     color: "#aaa",
     fontSize: "10px",
     fontStyle: "italic",
