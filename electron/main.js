@@ -68,15 +68,15 @@ function createWindow() {
     template.unshift({
       label: app.getName(),
       submenu: [
-        { role: "about" },
+        { role: "about", label: "About Planning Center API Explorer" },
         { type: "separator" },
         { role: "services", submenu: [] },
         { type: "separator" },
-        { role: "hide" },
+        { role: "hide", label: "Hide Planning Center API Explorer" },
         { role: "hideothers" },
         { role: "unhide" },
         { type: "separator" },
-        { role: "quit" },
+        { role: "quit", label: "Quit Planning Center API Explorer" },
       ],
     })
 
