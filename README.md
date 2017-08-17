@@ -9,11 +9,11 @@
 
   ```bash
   cd electron
-  npm install
-  npm run-script watch
+  yarn install
+  yarn watch
   ```
 
-3. To launch the app: `npm start`
+3. To launch the app: `yarn start`
 
 ## Troubleshooting
 
