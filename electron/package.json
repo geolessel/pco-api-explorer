@@ -1,10 +1,33 @@
 {
   "name": "pco-api-explorer",
+  "description": "An easy to use, self-discovering way to explore Planning Center's public API.",
+  "author": {
+    "name": "Geoffrey Lessel",
+    "email": "geo@pco.bz",
+    "url": "http://planning.center"
+  },
+  "contributors": [
+    {
+      "name": "Jesse Anderson",
+      "email": "jesse@pco.bz",
+      "url": "http://planning.center"
+    }
+  ],
   "version": "0.1.0",
+  "build": {
+    "appId": "center.planning.api-explorer",
+    "productName": "Planning Center API Explorer",
+    "copyright": "Copyright 2017 Geoffrey Lessel, Jesse Anderson",
+    "mac": {
+      "category": "public.app-category.developer-tools"
+    }
+  },
   "main": "main.js",
   "scripts": {
     "start": "./node_modules/.bin/electron .",
-    "watch": "./node_modules/.bin/webpack-dev-server"
+    "watch": "./node_modules/.bin/webpack-dev-server",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "devDependencies": {
     "babel": "^6.23.0",
@@ -16,15 +39,19 @@
     "base-64": "^0.1.0",
     "create-styled-element": "^0.5.1",
     "electron": "^1.7.5",
+    "electron-builder": "^19.22.1",
+    "file": "^0.2.2",
     "golly": "^0.3.1",
     "react-copy-to-clipboard": "^5.0.0",
     "react-json-view": "^1.12.0",
     "react-loading": "^0.1.4",
+    "system": "^2.0.1",
     "underscore": "^1.8.3",
     "webpack": "^3.5.5",
     "webpack-dev-server": "^2.7.1"
   },
   "dependencies": {
+    "mousetrap": "^1.6.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1"
   }

@@ -5,6 +5,7 @@ import createStyledElement from "create-styled-element"
 import _ from "underscore"
 import ReactLoading from "react-loading" // https://github.com/fakiolinho/react-loading
 import CopyToClipboard from "react-copy-to-clipboard"
+import Mousetrap from "mousetrap"
 
 import Button from "./ui/button.jsx"
 import Footer from "./ui/footer.jsx"
@@ -19,6 +20,8 @@ import TextInput from "./ui/text_input.jsx"
 import TextWrapper from "./ui/text_wrapper.jsx"
 
 const base64 = require("base-64")
+const electron = window.require("electron")
+
 const defaultPerPage = 25
 const defaultOffset = 0
 const defaultParams = {
@@ -28,8 +31,8 @@ const defaultParams = {
 }
 const debounceTime = 500
 
-const log = true
-// const log = false
+// const log = true
+const log = false
 const console = {
   groupCollapsed(name) {
     if (log) {
@@ -161,6 +164,16 @@ class Container extends React.Component {
     this.findNodeBySelf = this.findNodeBySelf.bind(this)
     this.baseUrl = this.baseUrl.bind(this)
     this.computePath = this.computePath.bind(this)
+  }
+
+  componentDidMount() {
+    window.console.log(
+      "%cYou seem interested in how things work.\nWanna work for Planning Center?\nhttps://planning.center/careers",
+      "color: blue"
+    )
+    Mousetrap.bind("command+option+i", () =>
+      electron.remote.BrowserWindow.getFocusedWindow().toggleDevTools()
+    )
   }
 
   render() {
