@@ -9,8 +9,11 @@ const Footer = props => {
     fontSize: "10px",
     fontStyle: "italic",
     lineHeight: "16px",
-    padding: "8px",
+    padding: "7px 8px 8px",
+    position: "fixed",
     textAlign: "right",
+    bottom: "0",
+    width: "calc(100% - 16px)",
   }
   return createStyledElement("div", props)(styles)
 }

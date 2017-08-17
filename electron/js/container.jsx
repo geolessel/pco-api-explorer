@@ -178,12 +178,10 @@ class Container extends React.Component {
     return (
       <Div
         css={{
-          borderRadius: "4px",
           display: "flex",
           overflow: "hidden",
           flexDirection: "column",
-          margin: "16px",
-          minHeight: "calc(100vh - 32px)",
+          minHeight: "100vh",
         }}
       >
         <Header>Planning Center API Explorer</Header>
@@ -193,6 +191,8 @@ class Container extends React.Component {
                 background: "#fafafa",
                 display: "flex",
                 flex: "1",
+                paddingTop: "88px",
+                paddingBottom: "32px",
               }}
             >
               <Div css={{ flexBasis: "200px" }}>
