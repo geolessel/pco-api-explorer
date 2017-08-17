@@ -6,6 +6,7 @@
    [https://api.planningcenteronline.com/oauth/applications](https://api.planningcenteronline.com/oauth/applications)
 
 2. Run this for development (hot reloading):
+
   ```bash
   cd electron
   npm install
@@ -31,7 +32,7 @@
   These values are stored locally so are retained between app sessions.
     
 
-* If you'd like to point the app to a different API endpoint (like your local dev tools or staging),
+* If you'd like to point the app to a different API endpoint,
   you can do so by opening the developer tools and in the js console:
 
   ```javascript
