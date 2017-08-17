@@ -387,6 +387,7 @@ class Container extends React.Component {
                 () => {
                   localStorage.apiId = id
                   localStorage.apiSecret = secret
+                  setAPIKey(id, secret)
                 }
               )
             }}
@@ -794,6 +795,7 @@ const Filtering = ({ response, onChange, params }) => {
     const options = response.meta.can_filter.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
+        {" "}
         {o}
       </OptionsLabel>
     ))
