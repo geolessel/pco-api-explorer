@@ -8,13 +8,14 @@ import CopyToClipboard from "react-copy-to-clipboard"
 
 import Button from "./ui/button.jsx"
 import Footer from "./ui/footer.jsx"
+import FormInput from "./ui/form_input.jsx"
 import Header from "./ui/header.jsx"
 import Headline from "./ui/headline.jsx"
-import LabelInput from "./ui/label_input.jsx"
 import ListItem from "./ui/list_item.jsx"
 import NavLink from "./ui/nav_link.jsx"
 import OptionsLabel from "./ui/options_label.jsx"
 import Pane from "./ui/pane.jsx"
+import TextInput from "./ui/text_input.jsx"
 import TextWrapper from "./ui/text_wrapper.jsx"
 
 const base64 = require("base-64")
@@ -23,7 +24,7 @@ const defaultOffset = 0
 const defaultParams = {
   per_page: defaultPerPage,
   offset: defaultOffset,
-  custom: ""
+  custom: "",
 }
 const debounceTime = 500
 
@@ -46,7 +47,7 @@ const console = {
     if (log) {
       window.console.log(...terms)
     }
-  }
+  },
 }
 
 const setAPIKey = (id, secret) => {
@@ -59,8 +60,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -98,29 +99,29 @@ class Container extends React.Component {
         self: `${apiRoot}/check_ins/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["check_ins", apiVersion]
+        path: ["check_ins", apiVersion],
       }),
       new Node({
         name: "giving",
         self: `${apiRoot}/giving/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["giving", apiVersion]
+        path: ["giving", apiVersion],
       }),
       new Node({
         name: "people",
         self: `${apiRoot}/people/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["people", apiVersion]
+        path: ["people", apiVersion],
       }),
       new Node({
         name: "services",
         self: `${apiRoot}/services/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["services", apiVersion]
-      })
+        path: ["services", apiVersion],
+      }),
     ]
 
     this.state = {
@@ -134,7 +135,7 @@ class Container extends React.Component {
       selectedId: null,
       apiId: apiId,
       apiSecret: apiSecret,
-      credentialsStored: !!apiId && !!apiSecret
+      credentialsStored: !!apiId && !!apiSecret,
     }
 
     this.handleLinkClick = this.handleLinkClick.bind(this)
@@ -170,7 +171,7 @@ class Container extends React.Component {
       tree,
       credentialsStored,
       apiId,
-      apiSecret
+      apiSecret,
     } = this.state
     const { Div, Input, Span } = createStyledElement
 
@@ -182,7 +183,7 @@ class Container extends React.Component {
           overflow: "hidden",
           flexDirection: "column",
           margin: "16px",
-          minHeight: "calc(100vh - 32px)"
+          minHeight: "calc(100vh - 32px)",
         }}
       >
         <Header>Planning Center API Explorer</Header>
@@ -191,7 +192,7 @@ class Container extends React.Component {
               css={{
                 background: "#fafafa",
                 display: "flex",
-                flex: "1"
+                flex: "1",
               }}
             >
               <Div css={{ flexBasis: "200px" }}>
@@ -207,7 +208,7 @@ class Container extends React.Component {
                   background: "#f7f7f7",
                   flex: "1",
                   minWidth: "0",
-                  padding: "32px"
+                  padding: "32px",
                 }}
               >
                 <Pane
@@ -217,7 +218,7 @@ class Container extends React.Component {
                     display: "flex",
                     lineHeight: "24px",
                     marginBottom: "32px",
-                    minHeight: "24px"
+                    minHeight: "24px",
                   }}
                 >
                   <Div css={{ flex: "0 0 auto", fontWeight: "700" }}>
@@ -241,19 +242,19 @@ class Container extends React.Component {
                     display: "flex",
                     flex: "1",
                     "@media(max-width: 1000px)": {
-                      flexDirection: "column"
-                    }
+                      flexDirection: "column",
+                    },
                   }}
                 >
                   <Div
                     css={{
-                      flex: "1",
+                      flex: "0 4 400px",
                       margin: "0 32px 0 0",
                       minWidth: "0",
                       overflow: "hidden",
                       textOverflow: "ellipses",
                       whiteSpace: "nowrap",
-                      "@media(max-width: 1000px)": { margin: "0 0 32px" }
+                      "@media(max-width: 1000px)": { margin: "0 0 32px" },
                     }}
                   >
                     <Headline>URL Parameters</Headline>
@@ -300,7 +301,7 @@ class Container extends React.Component {
                       }}
                     />
                   </Div>
-                  <Div css={{ flex: "1", minWidth: "0" }}>
+                  <Div css={{ flex: "1 1 400px", minWidth: "0" }}>
                     <Headline>Server Response</Headline>
                     <Pane theme="dark" css={{ overflow: "scroll" }}>
                       {this.state.isFetching
@@ -333,7 +334,7 @@ class Container extends React.Component {
           flex: "1",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
         }}
       >
         <Pane
@@ -343,7 +344,7 @@ class Container extends React.Component {
             margin: "0 auto",
             padding: "24px",
             width: "400px",
-            "@media(max-width:600px)": { width: "calc(100% - 64px)" }
+            "@media(max-width:600px)": { width: "calc(100% - 64px)" },
           }}
         >
           <Div css={{ marginBottom: "32px", textAlign: "center" }}>
@@ -351,8 +352,7 @@ class Container extends React.Component {
             <p>We just need your API credentials.</p>
           </Div>
           <Div css={{ marginBottom: "32px" }}>
-            <LabelInput
-              stacked
+            <TextInput
               name="apiId"
               id="apiId"
               type="text"
@@ -360,9 +360,8 @@ class Container extends React.Component {
               placeholder="Paste in your Planning Center API App ID"
             >
               App Id:
-            </LabelInput>
-            <LabelInput
-              stacked
+            </TextInput>
+            <TextInput
               name="apiSecret"
               id="apiSecret"
               type="text"
@@ -370,7 +369,7 @@ class Container extends React.Component {
               placeholder="Paste in your Planning Center API App Secret"
             >
               App Secret:
-            </LabelInput>
+            </TextInput>
           </Div>
           <Button
             theme="success"
@@ -382,7 +381,7 @@ class Container extends React.Component {
                 {
                   apiId: id,
                   apiSecret: secret,
-                  credentialsStored: !!id && !!secret
+                  credentialsStored: !!id && !!secret,
                 },
                 () => {
                   localStorage.apiId = id
@@ -418,7 +417,7 @@ class Container extends React.Component {
                 children: [],
                 id: Number(data.id),
                 name,
-                path
+                path,
               })
             )
           }
@@ -438,7 +437,7 @@ class Container extends React.Component {
               children: [],
               id: Number(d.id),
               name,
-              path
+              path,
             })
           )
           parent.childrenIds = parent.children.map(c => c.id)
@@ -461,7 +460,7 @@ class Container extends React.Component {
         currentNode,
         selectedId,
         currentURL: currentNode.self,
-        params: defaultParams
+        params: defaultParams,
       },
       () => {
         this.updateParams({})
@@ -509,7 +508,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included
+      include: included,
     })
 
     this.updateParams(params)
@@ -527,7 +526,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered
+      filter: filtered,
     })
 
     this.updateParams(params)
@@ -652,7 +651,7 @@ const Tree = ({
   childrenIds,
   currentURL,
   onClick,
-  style
+  style,
 }) => {
   const tree = children.map(l => {
     let childTree
@@ -699,9 +698,9 @@ const Tree = ({
 
 const ID = ({ onChange, parent, currentNode }) => {
   if (parent && parent.childrenIds && parent.childrenIds.length > 0) {
-    const options = parent.children.map(c => (
+    const options = parent.children.map(c =>
       <option key={c.id} value={c.id}>{c.id}</option>
-    ))
+    )
 
     return (
       <Pane>
@@ -718,29 +717,35 @@ const ID = ({ onChange, parent, currentNode }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o => (
-      <OptionsLabel key={o}>
-        <input type="radio" name="orderBy" value={o} onChange={onChange} />
-        {" "}
+    const options = response.meta.can_order_by.map(o =>
+      <FormInput
+        id={o}
+        key={o}
+        type="radio"
+        name="orderBy"
+        value={o}
+        selected={params.order === o}
+        onChange={onChange}
+      >
         {o}
-      </OptionsLabel>
-    ))
+      </FormInput>
+    )
 
     return (
       <Pane>
         <Headline>Ordering</Headline>
         <div>
-          <OptionsLabel key={"none"}>
-            <input
-              type="radio"
-              name="orderBy"
-              onChange={onChange}
-              value="none"
-              checked={params.order == undefined}
-            />
-            {" "}
-            None
-          </OptionsLabel>
+          <FormInput
+            key={"none"}
+            type="radio"
+            name="orderBy"
+            onChange={onChange}
+            value="none"
+            checked={params.order == undefined}
+            selected={!params.order}
+          >
+            none
+          </FormInput>
           {options}
         </div>
       </Pane>
@@ -752,9 +757,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o => (
-      <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    ))
+    const options = response.meta.can_query_by.map(o =>
+      <TextInput key={o} name={o} type="text" onChange={onChange} />
+    )
 
     return (
       <Pane>
@@ -769,13 +774,18 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o => (
-      <OptionsLabel key={o}>
-        <input type="checkbox" name={o} onChange={onChange} />
-        {" "}
+    const options = response.meta.can_include.map(o =>
+      <FormInput
+        id={o}
+        key={o}
+        type="checkbox"
+        name={o}
+        onChange={onChange}
+        selected={params.include && params.include.includes(o)}
+      >
         {o}
-      </OptionsLabel>
-    ))
+      </FormInput>
+    )
 
     return (
       <Pane>
@@ -792,13 +802,18 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o => (
-      <OptionsLabel key={o}>
-        <input type="checkbox" name={o} onChange={onChange} />
-        {" "}
+    const options = response.meta.can_filter.map(o =>
+      <FormInput
+        id={o}
+        key={o}
+        type="checkbox"
+        name={o}
+        onChange={onChange}
+        selected={params.filter && params.filter.includes(o)}
+      >
         {o}
-      </OptionsLabel>
-    ))
+      </FormInput>
+    )
 
     return (
       <Pane>
@@ -817,7 +832,7 @@ const Limiting = ({ response, onChange, params }) => {
   return (
     <Pane>
       <Headline>Limiting</Headline>
-      <LabelInput
+      <TextInput
         onChange={onChange}
         name="offset"
         type="number"
@@ -825,8 +840,8 @@ const Limiting = ({ response, onChange, params }) => {
         placeholder={`default is ${defaultOffset}`}
       >
         Offset:
-      </LabelInput>
-      <LabelInput
+      </TextInput>
+      <TextInput
         onChange={onChange}
         name="per_page"
         type="number"
@@ -834,7 +849,7 @@ const Limiting = ({ response, onChange, params }) => {
         placeholder={`default is ${defaultPerPage}`}
       >
         Per page:
-      </LabelInput>
+      </TextInput>
     </Pane>
   )
 }
@@ -843,14 +858,14 @@ const Custom = ({ response, onChange, params }) => {
   return (
     <Pane>
       <Headline>Custom Parameters</Headline>
-      <LabelInput
+      <TextInput
         onChange={onChange}
         name="custom"
         type="text"
         defaultValue={params.custom}
       >
         Custom:
-      </LabelInput>
+      </TextInput>
     </Pane>
   )
 }
@@ -867,7 +882,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px"
+            padding: "4px",
           }}
           readOnly={true}
           type="text"
