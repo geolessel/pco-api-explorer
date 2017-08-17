@@ -13,7 +13,7 @@
   yarn watch
   ```
 
-3. To launch the app: `yarn start`
+3. To launch the app: `yarn start` (_not_ in a tmux or screen session. It will hijack your paste commands for some reason.)
 
 ## Troubleshooting
 
