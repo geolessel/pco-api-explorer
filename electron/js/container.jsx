@@ -168,7 +168,7 @@ class Container extends React.Component {
 
   componentDidMount() {
     window.console.log(
-      "%cYou seem interested in how things work.\nWanna work for Planning Center?\nhttps://planning.center/careers",
+      "%cYou seem interested in how things work.\nWanna job at Planning Center?\nhttps://planning.center/careers",
       "color: blue"
     )
     Mousetrap.bind("command+option+i", () =>
@@ -711,9 +711,9 @@ const Tree = ({
 
 const ID = ({ onChange, parent, currentNode }) => {
   if (parent && parent.childrenIds && parent.childrenIds.length > 0) {
-    const options = parent.children.map(c =>
+    const options = parent.children.map(c => (
       <option key={c.id} value={c.id}>{c.id}</option>
-    )
+    ))
 
     return (
       <Pane>
@@ -730,10 +730,10 @@ const ID = ({ onChange, parent, currentNode }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o =>
+    const options = response.meta.can_order_by.map(o => (
       <FormInput
         id={o}
-        key={o}
+        key={`order-${o}`}
         type="radio"
         name="orderBy"
         value={o}
@@ -742,14 +742,14 @@ const Ordering = ({ response, onChange, params }) => {
       >
         {o}
       </FormInput>
-    )
+    ))
 
     return (
       <Pane>
         <Headline>Ordering</Headline>
         <div>
           <FormInput
-            key={"none"}
+            key="ordering-none"
             type="radio"
             name="orderBy"
             onChange={onChange}
@@ -770,9 +770,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o =>
+    const options = response.meta.can_query_by.map(o => (
       <TextInput key={o} name={o} type="text" onChange={onChange} />
-    )
+    ))
 
     return (
       <Pane>
@@ -787,7 +787,7 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o =>
+    const options = response.meta.can_include.map(o => (
       <FormInput
         id={o}
         key={o}
@@ -798,7 +798,7 @@ const Including = ({ response, onChange, params }) => {
       >
         {o}
       </FormInput>
-    )
+    ))
 
     return (
       <Pane>
@@ -815,7 +815,7 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o =>
+    const options = response.meta.can_filter.map(o => (
       <FormInput
         id={o}
         key={o}
@@ -826,7 +826,7 @@ const Filtering = ({ response, onChange, params }) => {
       >
         {o}
       </FormInput>
-    )
+    ))
 
     return (
       <Pane>

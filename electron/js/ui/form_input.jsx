@@ -38,9 +38,9 @@ const Text = ({ stacked, ...props }) => {
   return createStyledElement("span", props)(styles)
 }
 
-const FormInput = ({ children, key, selected, ...props }) => {
+const FormInput = ({ children, selected, ...props }) => {
   return (
-    <Label htmlFor={key} selected={selected}>
+    <Label key={props.name} htmlFor={props.name} selected={selected}>
       <Input {...props} />
       <Text>{children}</Text>
     </Label>
