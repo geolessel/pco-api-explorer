@@ -269,7 +269,7 @@ class Container extends React.Component {
                       overflow: "hidden",
                       textOverflow: "ellipses",
                       whiteSpace: "nowrap",
-                      "@media(max-width: 1000px)": { margin: "0 0 32px" }
+                      "@media(max-width: 1000px)": { flex: "1", margin: "0 0 32px" },
                     }}
                   >
                     <Headline>URL Parameters</Headline>
