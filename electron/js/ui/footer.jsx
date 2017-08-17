@@ -4,13 +4,18 @@ import createStyledElement from "create-styled-element"
 const Footer = props => {
   const styles = {
     background: "#fafafa",
-    borderTop: "1px solid #eee",
+    borderTop: "1px solid #d7d7d7",
     color: "#aaa",
+    display: "flex",
     fontSize: "10px",
     fontStyle: "italic",
+    justifyContent: "space-between",
     lineHeight: "16px",
-    padding: "8px",
+    padding: "7px 8px 8px",
+    position: "fixed",
     textAlign: "right",
+    bottom: "0",
+    width: "calc(100% - 16px)",
   }
   return createStyledElement("div", props)(styles)
 }

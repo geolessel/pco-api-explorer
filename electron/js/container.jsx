@@ -191,12 +191,10 @@ class Container extends React.Component {
     return (
       <Div
         css={{
-          borderRadius: "4px",
           display: "flex",
           overflow: "hidden",
           flexDirection: "column",
-          margin: "16px",
-          minHeight: "calc(100vh - 32px)",
+          minHeight: "100vh",
         }}
       >
         <Header>Planning Center API Explorer</Header>
@@ -206,6 +204,8 @@ class Container extends React.Component {
                 background: "#fafafa",
                 display: "flex",
                 flex: "1",
+                paddingTop: "88px",
+                paddingBottom: "32px",
               }}
             >
               <Div css={{ flexBasis: "200px" }}>
@@ -331,7 +331,10 @@ class Container extends React.Component {
               </Div>
             </Div>
           : this.renderSetup()}
-        <Footer>That's all folks.</Footer>
+        <Footer>
+          <div>a Geoffrey Lessel &amp; Jesse J. Anderson joint</div>
+          <div>Copyright &copy; 2017 Planning Center</div>
+        </Footer>
       </Div>
     )
   }
@@ -728,7 +731,7 @@ const ID = ({ onChange, parent, currentNode }) => {
 
     return (
       <Pane>
-        <Headline>{currentNode.type} ID</Headline>
+        <Headline tag="h2">{currentNode.type} ID</Headline>
         <select name={`${parent.name}_id`} onChange={onChange}>
           {options}
         </select>
@@ -757,7 +760,7 @@ const Ordering = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Ordering</Headline>
+        <Headline tag="h2">Ordering</Headline>
         <div>
           <FormInput
             key="ordering-none"
@@ -787,7 +790,7 @@ const Querying = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Querying</Headline>
+        <Headline tag="h2">Querying</Headline>
         {options}
       </Pane>
     )
@@ -813,7 +816,7 @@ const Including = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Including</Headline>
+        <Headline tag="h2">Including</Headline>
         <div>
           {options}
         </div>
@@ -841,7 +844,7 @@ const Filtering = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Filtering</Headline>
+        <Headline tag="h2">Filtering</Headline>
         <div>
           {options}
         </div>
@@ -855,7 +858,7 @@ const Filtering = ({ response, onChange, params }) => {
 const Limiting = ({ response, onChange, params }) => {
   return (
     <Pane>
-      <Headline>Limiting</Headline>
+      <Headline tag="h2">Limiting</Headline>
       <TextInput
         onChange={onChange}
         name="offset"
@@ -881,7 +884,7 @@ const Limiting = ({ response, onChange, params }) => {
 const Custom = ({ response, onChange, params }) => {
   return (
     <Pane>
-      <Headline>Custom Parameters</Headline>
+      <Headline tag="h2">Custom Parameters</Headline>
       <TextInput
         onChange={onChange}
         name="custom"

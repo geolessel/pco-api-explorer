@@ -4,10 +4,12 @@ import createStyledElement from "create-styled-element"
 const Wrapper = props => {
   const styles = {
     background: "linear-gradient(135deg, #47494f, #2b303b)",
-    borderBottom: "1px solid #37393f",
     color: "#ffffff",
     margin: "0",
     padding: "32px",
+    position: "fixed",
+    width: "100%",
+    zIndex: "100",
   }
   return createStyledElement("div", props)(styles)
 }
