@@ -9,7 +9,7 @@
 
     <title>Hello ApiExplorer!</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:100,400,700,700italic,400italic,100italic">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:200,400,700,700italic,400italic,200italic">
   </head>
 
   <body>

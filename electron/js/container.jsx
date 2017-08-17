@@ -704,7 +704,7 @@ const ID = ({ onChange, parent, currentNode }) => {
 
     return (
       <Pane>
-        <Headline>{currentNode.type} ID</Headline>
+        <Headline tag="h2">{currentNode.type} ID</Headline>
         <select name={`${parent.name}_id`} onChange={onChange}>
           {options}
         </select>
@@ -733,7 +733,7 @@ const Ordering = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Ordering</Headline>
+        <Headline tag="h2">Ordering</Headline>
         <div>
           <FormInput
             key={"none"}
@@ -763,7 +763,7 @@ const Querying = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Querying</Headline>
+        <Headline tag="h2">Querying</Headline>
         {options}
       </Pane>
     )
@@ -789,7 +789,7 @@ const Including = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Including</Headline>
+        <Headline tag="h2">Including</Headline>
         <div>
           {options}
         </div>
@@ -817,7 +817,7 @@ const Filtering = ({ response, onChange, params }) => {
 
     return (
       <Pane>
-        <Headline>Filtering</Headline>
+        <Headline tag="h2">Filtering</Headline>
         <div>
           {options}
         </div>
@@ -831,7 +831,7 @@ const Filtering = ({ response, onChange, params }) => {
 const Limiting = ({ response, onChange, params }) => {
   return (
     <Pane>
-      <Headline>Limiting</Headline>
+      <Headline tag="h2">Limiting</Headline>
       <TextInput
         onChange={onChange}
         name="offset"
@@ -857,7 +857,7 @@ const Limiting = ({ response, onChange, params }) => {
 const Custom = ({ response, onChange, params }) => {
   return (
     <Pane>
-      <Headline>Custom Parameters</Headline>
+      <Headline tag="h2">Custom Parameters</Headline>
       <TextInput
         onChange={onChange}
         name="custom"
