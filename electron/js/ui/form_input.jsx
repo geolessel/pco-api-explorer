@@ -40,7 +40,7 @@ const Text = ({ stacked, ...props }) => {
 
 const FormInput = ({ children, selected, ...props }) => {
   return (
-    <Label key={props.name} htmlFor={props.name} selected={selected}>
+    <Label key={props.name} htmlFor={props.id} selected={selected}>
       <Input {...props} />
       <Text>{children}</Text>
     </Label>

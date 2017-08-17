@@ -168,7 +168,7 @@ class Container extends React.Component {
 
   componentDidMount() {
     window.console.log(
-      "%cYou seem interested in how things work.\nWanna job at Planning Center?\nhttps://planning.center/careers",
+      "%cYou seem interested in how things work.\nWant to work at Planning Center?\nhttps://planning.center/careers",
       "color: blue"
     )
     Mousetrap.bind("command+option+i", () =>
@@ -363,6 +363,17 @@ class Container extends React.Component {
           <Div css={{ marginBottom: "32px", textAlign: "center" }}>
             <Headline>Let's get started!</Headline>
             <p>We just need your API credentials.</p>
+            <p style={{ marginTop: "1rem" }}>
+              <a
+                href="#"
+                onClick={() =>
+                  electron.shell.openExternal(
+                    "https://api.planningcenteronline.com/oauth/applications"
+                  )}
+              >
+                Find or create your Personal Access Token
+              </a>
+            </p>
           </Div>
           <Div css={{ marginBottom: "32px" }}>
             <TextInput
