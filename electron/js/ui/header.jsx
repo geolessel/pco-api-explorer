@@ -8,7 +8,7 @@ const Wrapper = props => {
     margin: "0",
     padding: "32px",
     position: "fixed",
-    width: "100%",
+    width: "calc(100vw - 64px)",
     zIndex: "100",
   }
   return createStyledElement("div", props)(styles)
