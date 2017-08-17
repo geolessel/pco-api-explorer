@@ -2,7 +2,13 @@ exports.config = {
   // See http://brunch.io/#documentation for docs.
   files: {
     javascripts: {
-      joinTo: "js/app.js"
+      joinTo: "js/app.js",
+      // entryPoints: {
+      //   "js/app.js": { "js/app.js": /^..\/..\/components\// }
+      // },
+      order: {
+        before: "*.jsx?"
+      }
 
       // To use a separate vendor.js bundle, specify two files path
       // http://brunch.io/docs/config#-files-
@@ -37,7 +43,7 @@ exports.config = {
   // Phoenix paths configuration
   paths: {
     // Dependencies and current project directories to watch
-    watched: ["static", "css", "js", "vendor"],
+    watched: ["static", "css", "js", "vendor", "../../components"],
     // Where to compile files to
     public: "../priv/static"
   },
@@ -45,20 +51,46 @@ exports.config = {
   // Configure your plugins
   plugins: {
     babel: {
-      presets: ["env", "react"],
-      plugins: ["transform-object-rest-spread"],
+      presets: [
+        // require.resolve("babel-preset-env"),
+        // require.resolve("babel-preset-react")
+        "env",
+        "react"
+      ],
+      plugins: [
+        // require.resolve("babel-plugin-transform-object-rest-spread")],
+        "transform-object-rest-spread"
+      ],
       // Do not use ES6 compiler in vendor code
       ignore: [/vendor/]
+      // compilers: ["env", "react", "transform-object-rest-spread"]
     }
   },
 
   modules: {
+    // wrapper: (path, data) => {
+    //   console.log(path, data)
+    // },
+    wrapper: (path, data) => {
+      console.log("wrapper:", path, data)
+      return `
+        require.define({${path}: function(exports, require, module) {
+          ${data}
+        }});\n\n
+      `
+    },
+    nameCleaner: path => console.log("path:", path),
     autoRequire: {
       "js/app.js": ["js/app"]
     }
   },
-
+  hooks: {
+    onCompile(generatedFiles, changedAssets) {
+      console.log(generatedFiles.map(f => f.path))
+    }
+  },
   npm: {
+    compilers: ["babel-brunch"],
     enabled: true
   }
 }

@@ -14,15 +14,23 @@ module.exports = {
     contentBase: "./public",
     publicPath: "http://localhost:8080/built/"
   },
+  resolve: {
+    modules: ["../electron/node_modules"]
+  },
   module: {
     loaders: [
       {
         test: /\.jsx?$/,
         loader: "babel-loader",
-        exclude: /.*node_modules\/((?!my-symlinked-module).)*$/,
+        exclude: /node_modules/,
         query: {
-          presets: ["react", "es2015"],
-          plugins: ["transform-object-rest-spread"]
+          presets: [
+            require.resolve("babel-preset-react"),
+            require.resolve("babel-preset-es2015")
+          ],
+          plugins: [
+            require.resolve("babel-plugin-transform-object-rest-spread")
+          ]
         }
       },
       { test: /\.css$/, loader: "style-loader!css-loader" },
