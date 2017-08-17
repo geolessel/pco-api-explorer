@@ -25,9 +25,11 @@ const electron = window.require("electron")
 const defaultPerPage = 25
 const defaultOffset = 0
 const defaultParams = {
-  per_page: defaultPerPage,
-  offset: defaultOffset,
+  per_page: "",
+  offset: "",
   custom: "",
+  include: [],
+  querying: []
 }
 const debounceTime = 500
 
@@ -50,7 +52,7 @@ const console = {
     if (log) {
       window.console.log(...terms)
     }
-  },
+  }
 }
 
 const setAPIKey = (id, secret) => {
@@ -63,8 +65,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`,
-      }),
+        Authorization: `Basic ${API.key}`
+      })
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -102,29 +104,29 @@ class Container extends React.Component {
         self: `${apiRoot}/check_ins/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["check_ins", apiVersion],
+        path: ["check_ins", apiVersion]
       }),
       new Node({
         name: "giving",
         self: `${apiRoot}/giving/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["giving", apiVersion],
+        path: ["giving", apiVersion]
       }),
       new Node({
         name: "people",
         self: `${apiRoot}/people/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["people", apiVersion],
+        path: ["people", apiVersion]
       }),
       new Node({
         name: "services",
         self: `${apiRoot}/services/${apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["services", apiVersion],
-      }),
+        path: ["services", apiVersion]
+      })
     ]
 
     this.state = {
@@ -138,7 +140,7 @@ class Container extends React.Component {
       selectedId: null,
       apiId: apiId,
       apiSecret: apiSecret,
-      credentialsStored: !!apiId && !!apiSecret,
+      credentialsStored: !!apiId && !!apiSecret
     }
 
     this.handleLinkClick = this.handleLinkClick.bind(this)
@@ -184,7 +186,7 @@ class Container extends React.Component {
       tree,
       credentialsStored,
       apiId,
-      apiSecret,
+      apiSecret
     } = this.state
     const { Div, Input, Span } = createStyledElement
 
@@ -194,7 +196,7 @@ class Container extends React.Component {
           display: "flex",
           overflow: "hidden",
           flexDirection: "column",
-          minHeight: "100vh",
+          minHeight: "100vh"
         }}
       >
         <Header>Planning Center API Explorer</Header>
@@ -205,7 +207,7 @@ class Container extends React.Component {
                 display: "flex",
                 flex: "1",
                 paddingTop: "88px",
-                paddingBottom: "32px",
+                paddingBottom: "32px"
               }}
             >
               <Div css={{ flexBasis: "200px" }}>
@@ -221,7 +223,7 @@ class Container extends React.Component {
                   background: "#f7f7f7",
                   flex: "1",
                   minWidth: "0",
-                  padding: "32px",
+                  padding: "32px"
                 }}
               >
                 <Pane
@@ -231,7 +233,7 @@ class Container extends React.Component {
                     display: "flex",
                     lineHeight: "24px",
                     marginBottom: "32px",
-                    minHeight: "24px",
+                    minHeight: "24px"
                   }}
                 >
                   <Div css={{ flex: "0 0 auto", fontWeight: "700" }}>
@@ -255,8 +257,8 @@ class Container extends React.Component {
                     display: "flex",
                     flex: "1",
                     "@media(max-width: 1000px)": {
-                      flexDirection: "column",
-                    },
+                      flexDirection: "column"
+                    }
                   }}
                 >
                   <Div
@@ -267,7 +269,7 @@ class Container extends React.Component {
                       overflow: "hidden",
                       textOverflow: "ellipses",
                       whiteSpace: "nowrap",
-                      "@media(max-width: 1000px)": { margin: "0 0 32px" },
+                      "@media(max-width: 1000px)": { margin: "0 0 32px" }
                     }}
                   >
                     <Headline>URL Parameters</Headline>
@@ -332,8 +334,8 @@ class Container extends React.Component {
             </Div>
           : this.renderSetup()}
         <Footer>
-          <div>a Geoffrey Lessel &amp; Jesse J. Anderson joint</div>
-          <div>Copyright &copy; 2017 Planning Center</div>
+          <div>a Geoffrey Lessel & Jesse J. Anderson joint</div>
+          <div>Copyright © 2017 Planning Center</div>
         </Footer>
       </Div>
     )
@@ -350,7 +352,7 @@ class Container extends React.Component {
           flex: "1",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "center"
         }}
       >
         <Pane
@@ -360,7 +362,7 @@ class Container extends React.Component {
             margin: "0 auto",
             padding: "24px",
             width: "400px",
-            "@media(max-width:600px)": { width: "calc(100% - 64px)" },
+            "@media(max-width:600px)": { width: "calc(100% - 64px)" }
           }}
         >
           <Div css={{ marginBottom: "32px", textAlign: "center" }}>
@@ -408,7 +410,7 @@ class Container extends React.Component {
                 {
                   apiId: id,
                   apiSecret: secret,
-                  credentialsStored: !!id && !!secret,
+                  credentialsStored: !!id && !!secret
                 },
                 () => {
                   localStorage.apiId = id
@@ -444,10 +446,11 @@ class Container extends React.Component {
                 children: [],
                 id: Number(data.id),
                 name,
-                path,
+                path
               })
             )
           }
+          parent.children = _.uniq(parent.children, false, c => c.self)
         }
       })
     } else if (Array.isArray(data)) {
@@ -464,9 +467,10 @@ class Container extends React.Component {
               children: [],
               id: Number(d.id),
               name,
-              path,
+              path
             })
           )
+          parent.children = _.uniq(parent.children, false, c => c.self)
           parent.childrenIds = parent.children.map(c => c.id)
         }
       })
@@ -486,11 +490,10 @@ class Container extends React.Component {
       {
         currentNode,
         selectedId,
-        currentURL: currentNode.self,
-        params: defaultParams,
+        currentURL: currentNode.self
       },
       () => {
-        this.updateParams({})
+        this.updateParams({ include: [], querying: [], filtering: [] })
       }
     )
     console.groupEnd()
@@ -535,7 +538,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included,
+      include: included
     })
 
     this.updateParams(params)
@@ -553,7 +556,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered,
+      filter: filtered
     })
 
     this.updateParams(params)
@@ -633,6 +636,11 @@ class Container extends React.Component {
     if (params.custom == "") {
       delete params.custom
     }
+    ;["include", "querying", "filtering"].forEach(p => {
+      if (params[p] && params[p].length < 1) {
+        delete params[p]
+      }
+    })
     let newParams = Object.keys(params)
       .filter(p => p !== "custom")
       .map(k => `${k}=${params[k]}`)
@@ -678,7 +686,7 @@ const Tree = ({
   childrenIds,
   currentURL,
   onClick,
-  style,
+  style
 }) => {
   const tree = children.map(l => {
     let childTree
@@ -751,6 +759,7 @@ const Ordering = ({ response, onChange, params }) => {
         type="radio"
         name="orderBy"
         value={o}
+        checked={params.order === o}
         selected={params.order === o}
         onChange={onChange}
       >
@@ -808,6 +817,7 @@ const Including = ({ response, onChange, params }) => {
         type="checkbox"
         name={o}
         onChange={onChange}
+        checked={params.include && params.include.includes(o)}
         selected={params.include && params.include.includes(o)}
       >
         {o}
@@ -836,6 +846,7 @@ const Filtering = ({ response, onChange, params }) => {
         type="checkbox"
         name={o}
         onChange={onChange}
+        checked={params.filter && params.filter.includes(o)}
         selected={params.filter && params.filter.includes(o)}
       >
         {o}
@@ -909,7 +920,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px",
+            padding: "4px"
           }}
           readOnly={true}
           type="text"
