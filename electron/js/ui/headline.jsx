@@ -6,7 +6,7 @@ const Headline = props => {
     color: "#333333",
     fontSize: "18px",
     lineHeight: "24px",
-    margin: "0 0 24px",
+    margin: "0 0 16px",
   }
   return createStyledElement("h1", props)(styles)
 }
