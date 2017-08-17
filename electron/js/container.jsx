@@ -385,6 +385,7 @@ class Container extends React.Component {
                 () => {
                   localStorage.apiId = id
                   localStorage.apiSecret = secret
+                  setAPIKey(id, secret)
                 }
               )
             }}
@@ -696,9 +697,9 @@ const Tree = ({
 
 const ID = ({ onChange, parent, currentNode }) => {
   if (parent && parent.childrenIds && parent.childrenIds.length > 0) {
-    const options = parent.children.map(c =>
+    const options = parent.children.map(c => (
       <option key={c.id} value={c.id}>{c.id}</option>
-    )
+    ))
 
     return (
       <Pane>
@@ -715,13 +716,13 @@ const ID = ({ onChange, parent, currentNode }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o =>
+    const options = response.meta.can_order_by.map(o => (
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {" "}
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -749,9 +750,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o =>
+    const options = response.meta.can_query_by.map(o => (
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    )
+    ))
 
     return (
       <Pane>
@@ -766,13 +767,13 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o =>
+    const options = response.meta.can_include.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {" "}
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
@@ -789,12 +790,13 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o =>
+    const options = response.meta.can_filter.map(o => (
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
+        {" "}
         {o}
       </OptionsLabel>
-    )
+    ))
 
     return (
       <Pane>
