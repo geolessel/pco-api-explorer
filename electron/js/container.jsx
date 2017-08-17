@@ -23,7 +23,7 @@ const defaultOffset = 0
 const defaultParams = {
   per_page: defaultPerPage,
   offset: defaultOffset,
-  custom: ""
+  custom: "",
 }
 const debounceTime = 500
 
@@ -46,7 +46,7 @@ const console = {
     if (log) {
       window.console.log(...terms)
     }
-  }
+  },
 }
 
 const setAPIKey = (id, secret) => {
@@ -59,8 +59,8 @@ class API {
     console.log("getting url", url)
     fetch(url, {
       headers: new Headers({
-        Authorization: `Basic ${API.key}`
-      })
+        Authorization: `Basic ${API.key}`,
+      }),
     })
       .then(resp => resp.json())
       .then(resp => callback(resp))
@@ -92,29 +92,29 @@ class Container extends React.Component {
         self: `${this.apiRoot}/check_ins/${this.apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["check_ins", this.apiVersion]
+        path: ["check_ins", this.apiVersion],
       }),
       new Node({
         name: "giving",
         self: `${this.apiRoot}/giving/${this.apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["giving", this.apiVersion]
+        path: ["giving", this.apiVersion],
       }),
       new Node({
         name: "people",
         self: `${this.apiRoot}/people/${this.apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["people", this.apiVersion]
+        path: ["people", this.apiVersion],
       }),
       new Node({
         name: "services",
         self: `${this.apiRoot}/services/${this.apiVersion}`,
         children: [],
         childrenIds: [],
-        path: ["services", this.apiVersion]
-      })
+        path: ["services", this.apiVersion],
+      }),
     ]
 
     const apiId = window.localStorage.apiId
@@ -132,7 +132,7 @@ class Container extends React.Component {
       selectedId: null,
       apiId: apiId,
       apiSecret: apiSecret,
-      credentialsStored: !!apiId && !!apiSecret
+      credentialsStored: !!apiId && !!apiSecret,
     }
 
     this.handleLinkClick = this.handleLinkClick.bind(this)
@@ -168,7 +168,7 @@ class Container extends React.Component {
       tree,
       credentialsStored,
       apiId,
-      apiSecret
+      apiSecret,
     } = this.state
     const { Div, Input, Span } = createStyledElement
 
@@ -179,8 +179,8 @@ class Container extends React.Component {
           display: "flex",
           overflow: "hidden",
           flexDirection: "column",
-          margin: "16px 0",
-          minHeight: "calc(100vh - 32px)"
+          margin: "16px",
+          minHeight: "calc(100vh - 32px)",
         }}
       >
         <Header>Planning Center API Explorer</Header>
@@ -189,7 +189,7 @@ class Container extends React.Component {
               css={{
                 background: "#fafafa",
                 display: "flex",
-                flex: "1"
+                flex: "1",
               }}
             >
               <Div css={{ flexBasis: "200px" }}>
@@ -205,7 +205,7 @@ class Container extends React.Component {
                   background: "#f7f7f7",
                   flex: "1",
                   minWidth: "0",
-                  padding: "32px"
+                  padding: "32px",
                 }}
               >
                 <Pane
@@ -215,7 +215,7 @@ class Container extends React.Component {
                     display: "flex",
                     lineHeight: "24px",
                     marginBottom: "32px",
-                    minHeight: "24px"
+                    minHeight: "24px",
                   }}
                 >
                   <Div css={{ flex: "0 0 auto", fontWeight: "700" }}>
@@ -234,7 +234,15 @@ class Container extends React.Component {
                       </Div>
                     </CopyToClipboard>}
                 </Pane>
-                <Div css={{ display: "flex", flex: "1" }}>
+                <Div
+                  css={{
+                    display: "flex",
+                    flex: "1",
+                    "@media(max-width: 1000px)": {
+                      flexDirection: "column",
+                    },
+                  }}
+                >
                   <Div
                     css={{
                       flex: "1",
@@ -243,7 +251,7 @@ class Container extends React.Component {
                       overflow: "hidden",
                       textOverflow: "ellipses",
                       whiteSpace: "nowrap",
-                      "@media(max-width: 999px)": { margin: "0 0 32px" }
+                      "@media(max-width: 1000px)": { margin: "0 0 32px" },
                     }}
                   >
                     <Headline>URL Parameters</Headline>
@@ -306,54 +314,85 @@ class Container extends React.Component {
                 </Div>
               </Div>
             </Div>
-          : <Div
-              css={{
-                background: "#fafafa",
-                display: "flex",
-                flex: "1"
-              }}
-            >
-              <Headline>Let's get started!</Headline>
-              <p>We just need your api credentials</p>
-              <LabelInput
-                name="apiId"
-                id="apiId"
-                type="text"
-                defaultValue={apiId}
-                placeholder="Paste in your Planning Center API App Id"
-              >
-                App Id:
-              </LabelInput>
-              <LabelInput
-                name="apiSecret"
-                id="apiSecret"
-                type="text"
-                defaultValue={apiSecret}
-                placeholder="Paste in your Planning Center API App Secret"
-              >
-                Secret:
-              </LabelInput>
-              <button
-                onClick={() => {
-                  const id = document.getElementById("apiId").value
-                  const secret = document.getElementById("apiSecret").value
-                  this.setState(
-                    {
-                      apiId: id,
-                      apiSecret: secret,
-                      credentialsStored: !!id && !!secret
-                    },
-                    () => {
-                      localStorage.apiId = id
-                      localStorage.apiSecret = secret
-                    }
-                  )
-                }}
-              >
-                Save
-              </button>
-            </Div>}
+          : this.renderSetup()}
         <Footer>That's all folks.</Footer>
+      </Div>
+    )
+  }
+
+  renderSetup() {
+    const { apiId, apiSecret } = this.state
+    const { Div, Input, Label } = createStyledElement
+    return (
+      <Div
+        css={{
+          background: "#fafafa",
+          display: "flex",
+          flex: "1",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Pane
+          css={{
+            display: "flex",
+            flexDirection: "column",
+            margin: "0 auto",
+            padding: "24px",
+            width: "400px",
+            "@media(max-width:600px)": { width: "calc(100% - 64px)" },
+          }}
+        >
+          <Div css={{ marginBottom: "32px", textAlign: "center" }}>
+            <Headline>Let's get started!</Headline>
+            <p>We just need your API credentials.</p>
+          </Div>
+          <Div css={{ marginBottom: "32px" }}>
+            <LabelInput
+              stacked
+              name="apiId"
+              id="apiId"
+              type="text"
+              defaultValue={apiId}
+              placeholder="Paste in your Planning Center API App ID"
+            >
+              App Id:
+            </LabelInput>
+            <LabelInput
+              stacked
+              name="apiSecret"
+              id="apiSecret"
+              type="text"
+              defaultValue={apiSecret}
+              placeholder="Paste in your Planning Center API App Secret"
+            >
+              App Secret:
+            </LabelInput>
+          </Div>
+          <Button
+            theme="success"
+            size="lg"
+            onClick={() => {
+              const id = document.getElementById("apiId").value
+              const secret = document.getElementById("apiSecret").value
+              this.setState(
+                {
+                  apiId: id,
+                  apiSecret: secret,
+                  credentialsStored: !!id && !!secret,
+                },
+                () => {
+                  localStorage.apiId = id
+                  localStorage.apiSecret = secret
+                }
+              )
+            }}
+            css={{ textAlign: "center" }}
+          >
+            Save Credentials
+          </Button>
+        </Pane>
       </Div>
     )
   }
@@ -376,7 +415,7 @@ class Container extends React.Component {
                 children: [],
                 id: Number(data.id),
                 name,
-                path
+                path,
               })
             )
           }
@@ -396,7 +435,7 @@ class Container extends React.Component {
               children: [],
               id: Number(d.id),
               name,
-              path
+              path,
             })
           )
           parent.childrenIds = parent.children.map(c => c.id)
@@ -419,7 +458,7 @@ class Container extends React.Component {
         currentNode,
         selectedId,
         currentURL: currentNode.self,
-        params: defaultParams
+        params: defaultParams,
       },
       () => {
         this.updateParams({})
@@ -467,7 +506,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      include: included
+      include: included,
     })
 
     this.updateParams(params)
@@ -485,7 +524,7 @@ class Container extends React.Component {
     }
 
     params = Object.assign(params, {
-      filter: filtered
+      filter: filtered,
     })
 
     this.updateParams(params)
@@ -610,7 +649,7 @@ const Tree = ({
   childrenIds,
   currentURL,
   onClick,
-  style
+  style,
 }) => {
   const tree = children.map(l => {
     let childTree
@@ -657,9 +696,9 @@ const Tree = ({
 
 const ID = ({ onChange, parent, currentNode }) => {
   if (parent && parent.childrenIds && parent.childrenIds.length > 0) {
-    const options = parent.children.map(c => (
+    const options = parent.children.map(c =>
       <option key={c.id} value={c.id}>{c.id}</option>
-    ))
+    )
 
     return (
       <Pane>
@@ -676,13 +715,13 @@ const ID = ({ onChange, parent, currentNode }) => {
 
 const Ordering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_order_by) {
-    const options = response.meta.can_order_by.map(o => (
+    const options = response.meta.can_order_by.map(o =>
       <OptionsLabel key={o}>
         <input type="radio" name="orderBy" value={o} onChange={onChange} />
         {" "}
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -710,9 +749,9 @@ const Ordering = ({ response, onChange, params }) => {
 
 const Querying = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_query_by) {
-    const options = response.meta.can_query_by.map(o => (
+    const options = response.meta.can_query_by.map(o =>
       <LabelInput key={o} name={o} type="text" onChange={onChange} />
-    ))
+    )
 
     return (
       <Pane>
@@ -727,13 +766,13 @@ const Querying = ({ response, onChange, params }) => {
 
 const Including = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_include) {
-    const options = response.meta.can_include.map(o => (
+    const options = response.meta.can_include.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {" "}
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -750,12 +789,12 @@ const Including = ({ response, onChange, params }) => {
 
 const Filtering = ({ response, onChange, params }) => {
   if (response && response.meta && response.meta.can_filter) {
-    const options = response.meta.can_filter.map(o => (
+    const options = response.meta.can_filter.map(o =>
       <OptionsLabel key={o}>
         <input type="checkbox" name={o} onChange={onChange} />
         {o}
       </OptionsLabel>
-    ))
+    )
 
     return (
       <Pane>
@@ -824,7 +863,7 @@ const CurrentLink = ({ current }) => {
             fontSize: "14px",
             lineHeight: "16px",
             marginLeft: "8px",
-            padding: "4px"
+            padding: "4px",
           }}
           readOnly={true}
           type="text"
