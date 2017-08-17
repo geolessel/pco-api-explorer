@@ -318,7 +318,10 @@ class Container extends React.Component {
               </Div>
             </Div>
           : this.renderSetup()}
-        <Footer>That's all folks.</Footer>
+        <Footer>
+          <div>a Geoffrey Lessel &amp; Jesse J. Anderson joint</div>
+          <div>Copyright &copy; 2017 Planning Center</div>
+        </Footer>
       </Div>
     )
   }
