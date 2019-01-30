@@ -1,3 +1,7 @@
+# Update 2019-01-30
+
+**Archiving this repo as the ideas explored here have been integrated into [https://api.planningcenteronline.com/explorer](https://api.planningcenteronline.com/explorer)**
+
 # Planning Center API Explorer
 
 ## Getting started
